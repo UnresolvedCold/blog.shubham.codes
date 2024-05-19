@@ -1,0 +1,30 @@
+name: Publish Hugo Website
+
+on:
+  push:
+    branches:
+      - master  # adjust as needed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Install Emacs
+        run: sudo apt-get install emacs
+
+      - name: Convert Blog to Hugo Files
+        run: |
+          emacs --batch -l ~/.emacs.d/init.el --eval "(require 'ox-hugo)" --visit org/blog.org --funcall org-hugo-export-wim-to-md
+
+      - name: Build Hugo Website
+        run: hugo
+
+      - name: Publish to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: public
