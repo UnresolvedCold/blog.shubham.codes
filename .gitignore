@@ -225,5 +225,4 @@ cython_debug/
 *.c
 *.cpp
 *.js
-content/posts/*
 static
