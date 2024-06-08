@@ -15,10 +15,14 @@ pluralizelisttitles = false
     dark_mode = true
     hideToc = false
     front_page_content = ["posts"]
+    # menu = [
+    #    {Name = "Blog", URL = "/posts/", Pre = "Recent", HasChildren = true, Limit = 3},
+    #    {Name = "About", URL = "/about/", HasChildren = false},
+    #    {Name = "CV", URL = "/cv/", HasChildren = false}]
+
     menu = [
-        {Name = "Blog", URL = "/posts/", Pre = "Recent", HasChildren = true, Limit = 3},
-        {Name = "About", URL = "/about/", HasChildren = false},
-        {Name = "CV", URL = "/cv/", HasChildren = false}]
+        {Name = "Blog", URL = "/posts/", Pre = "Recent", HasChildren = true, Limit = 3}]
+
     github_url = "https://github.com/unresolvedcold"
     linkedin_url = "https://linkedin.com/in/schwiftycold"
     twitter_url = "https://twitter.com/schwiftycold"
