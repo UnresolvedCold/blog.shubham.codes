@@ -226,3 +226,4 @@ cython_debug/
 *.cpp
 *.js
 static
+isableFastRender
