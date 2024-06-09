@@ -1,20 +1,10 @@
 {
-    "hosting": {
-      "public": "dist",
-      "ignore": [],
-      "headers": [ {
-        "source" : "**",
-        "headers" : [ {
-          "key" : "Access-Control-Allow-Origin",
-          "value" : "*"
-        } ]
-      }],
-      "redirects": [
-        {
-          "source": "/code",
-          "destination": "https://google.com/",
-          "type": 301
-        }
-      ]
-    }
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
   }
+}

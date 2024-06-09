@@ -21,8 +21,8 @@ jobs:
       - name: Build Hugo Website
         run: hugo --destination public
 
-      # - name: Publish to GitHub Pages
-      #   uses: peaceiris/actions-gh-pages@v3
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     publish_dir: public
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_NEW_BLOG_SCHWIFTYCOLD }}"
+          projectId: new-blog-schwiftycold
+          channelId: live
