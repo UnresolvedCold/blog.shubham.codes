@@ -1,10 +1,10 @@
 +++
 title = "Reflection API in Java"
 author = ["Shubham Kumar"]
-date = 2024-05-19T08:39:00+05:30
+date = 2024-06-22T00:03:00+05:30
 tags = ["java", "reflection-api"]
 categories = ["hugo"]
-draft = true
+draft = false
 +++
 
 ## Where is this used? {#where-is-this-used}

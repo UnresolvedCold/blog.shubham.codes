@@ -3,7 +3,8 @@
 #+HUGO_CODE_FENCE: nil
 
 * Hugo :@hugo:
-** TODO Reflection API in Java :java:reflection_api:
+** DONE Reflection API in Java :java:reflection_api:
+CLOSED: [2024-06-22 Sat 00:03]
 :PROPERTIES:
 :EXPORT_FILE_NAME: reflection-api-in-java
 :EXPORT_DATE: <2024-05-19 Sun 08:39>
