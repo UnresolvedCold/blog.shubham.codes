@@ -21,7 +21,9 @@ pluralizelisttitles = false
     #    {Name = "CV", URL = "/cv/", HasChildren = false}]
 
     menu = [
-        {Name = "Blog", URL = "/posts/", Pre = "Recent", HasChildren = true, Limit = 3}]
+        {Name = "Blog", URL = "/posts/", Pre = "Recent", HasChildren = true, Limit = 3},
+        {Name = "Code", URL = "/code/", Pre = "Recent", HasChildren = true, Limit = 3}
+        ]
 
     github_url = "https://github.com/unresolvedcold"
     linkedin_url = "https://linkedin.com/in/schwiftycold"
