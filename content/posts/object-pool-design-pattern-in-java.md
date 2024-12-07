@@ -95,17 +95,17 @@ class PoolManager {
     }
 
     public Object getObject() {
-        if (!freeObjects.isEmpty()) {
+        if (!availableResources.isEmpty()) {
             // A sync is required as 2 thread may want to get a free object at the same time
-            syncronized(freeObjects) {
-                Object freeObject = freeObjects.remove(freeObjects.size());
-                engagedObjects.add(freeObject);
+            syncronized(availableResources) {
+                Object freeObject = availableResources.remove(availableResources.size());
+                engagedResources.add(freeObject);
                 return freeObject;
             }
         }
-        else if (engagedObjects.size() < MAX_LIMIT) {
+        else if (engagedResources.size() < hardLimit) {
             Object freeObject = new ResourceObject();
-            freeObjects.add(freeObject);
+            availableResources.add(freeObject);
             return getObject();
         }
         else {
@@ -116,9 +116,9 @@ class PoolManager {
     public void releaseObject(Object engagedObject) {
         if (engagedObject != null) {
             try {
-                syncronized(engagedObjects) {
-                    Object freeObject = engagedObjects.remove(engagedObject);
-                    freeObjects.add(freeObject);
+                syncronized(engagedResources) {
+                    Object freeObject = engagedResources.remove(engagedObject);
+                    availableResources.add(freeObject);
                 }
             } catch (Exception e){}
         }
