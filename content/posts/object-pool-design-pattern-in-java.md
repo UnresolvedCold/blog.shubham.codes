@@ -76,15 +76,18 @@ class PoolManager {
         initialLimit = Properties.getInstance().getIntegerValue("POOL_INITIAL_LIMIT");
         hardLimit = Properties.getInstance().getIntegerValue("POOL_HARD_LIMIT");
 
+        availableResources = new ArrayList<>();
+        engagedResources = new ArrayList<>();
+
         // Initialize the initial number of resources in the pool
         for (int i=0; i<initialLimit; i++) {
             availableResources.add(new ResourceObject());
         }
     }
 
-    public PoolManager getInstance() {
+    public static PoolManager getInstance() {
         if (instance == null) {
-            syncronized(PoolManager.class) {
+            synchronized(PoolManager.class) {
                 if (instance == null) {
                     instance = new PoolManager();
                 }
@@ -97,8 +100,8 @@ class PoolManager {
     public Object getObject() {
         if (!availableResources.isEmpty()) {
             // A sync is required as 2 thread may want to get a free object at the same time
-            syncronized(availableResources) {
-                Object freeObject = availableResources.remove(availableResources.size());
+            synchronized(availableResources) {
+                Object freeObject = availableResources.remove(availableResources.size()-1);
                 engagedResources.add(freeObject);
                 return freeObject;
             }
@@ -116,13 +119,12 @@ class PoolManager {
     public void releaseObject(Object engagedObject) {
         if (engagedObject != null) {
             try {
-                syncronized(engagedResources) {
+                synchronized(engagedResources) {
                     Object freeObject = engagedResources.remove(engagedObject);
                     availableResources.add(freeObject);
                 }
             } catch (Exception e){}
         }
     }
-
 }
 {{< /highlight >}}
