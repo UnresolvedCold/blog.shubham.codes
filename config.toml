@@ -11,10 +11,10 @@ pluralizelisttitles = false
     # og_image = ""                             # path to social icon - front matter: image takes precedent, then og_image, then brand_url
     # publisher_icon = ""                       # path to publisher icon - defaults to favicon, used in schema
     # favicon = ""                              # path to favicon
-    description = 'Senior SDE (PoC) <a href="https://www.greyorange.com/">GreyOrange</a>'
+    description = 'Senior SDE (MTS) <a href="https://www.greyorange.com/">GreyOrange</a>'
     dark_mode = true
     hideToc = false
-    front_page_content = ["posts"]
+    front_page_content = ["posts", "code"]
     # menu = [
     #    {Name = "Blog", URL = "/posts/", Pre = "Recent", HasChildren = true, Limit = 3},
     #    {Name = "About", URL = "/about/", HasChildren = false},

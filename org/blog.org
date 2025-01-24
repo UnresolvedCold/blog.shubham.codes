@@ -136,3 +136,619 @@ public void testDuckCannotCreateMoreDucks() {
 
 }
 #+end_src
+** TODO Syncing org roam files across devices in WSL2 environment with better performance
+:PROPERTIES:
+:EXPORT_FILE_NAME: syncing-org-roam-files-across-devices-in-wsl2-environment-with-better-performance
+:EXPORT_DATE: <2024-07-28 Sun 06:14>
+:ID: 9a6939c7-3ebe-40f7-ab0f-ff0366f5345e
+:END:
+*** Motivation
+I am using Emacs with ~WSL2~ in ~Windows 11~.
+The org directory is being shared with my other devices within my network.
+This includes my phone and work laptop which are being synced using Syncthing.
+Syncthing is installed on my Windows machine and the org files are stored on the ~D drive~.
+~D drive~ is my non-Windows drive which I generally use to store static contents like recorded videos and digital games.
+This directory is shared with WSL2 instance.
+
+WSL2 has some inherent problem with frequent disk writes.
+It is very slow even on an SSD.
+~org-agenda~ was managable with small number of files but now, it is not managable at all.
+It takes 12s for ~org-agenda~ load all the files intially.
+And it really spoils the mood especially when you are in a hurry to note down the days todos.
+
+*** Idea
+Considering, you won't be writing simultaneously on 2 machine at once.
+The most obvious idea is to run your disc syncs separate from the main thread where you are reading from.
+But the default instance of Emacs does not support multi-threading.
+So I decided to do this in a hacky way.
+
+All I need to do is to run the disc sync separate from my Emacs instance.
+Let Emacs use an org directory from inside my WSL2 instance.
+This way, Emacs won't be waiting for the disc syncs which is making it run slower.
+Now, to sync the instance local directory with the shared org directory, I use unison on both the directories.
+
+This approach seems like the minimal effort way to get my Emacs faster.
+** DONE Downloading a single file from 2 independent apps
+CLOSED: [2024-09-01 Sun 00:11]
+:PROPERTIES:
+:EXPORT_FILE_NAME: downloading-a-single-file-from-2-independent-apps
+:EXPORT_DATE: <2024-08-31 Sat 22:42>
+:ID: 78cc5c43-524a-405e-9198-32e644f32369
+:END:
+*** Understanding the problem
+Let's say you have a very large log file.
+And you want to create an app that can analyze this file and generate insights.
+Also, let's say you want to create an another app that can simulate the work by reading the logs one-by-one.
+
+Both these apps are dependent on the same log file.
+Now, there are 2 scenarios.
+1. App1 starts, downloads the file and then App2 starts.
+2. App1 starts, downloading the file and App2 starts while the download is incomlete.
+
+The first scenario is easy to deal with. We can check the ~md5sum~ of the local file and the file on the server.
+If they match, nothing to worrry about. If they don't then we can have a complex logic to determine the life of the old log file and decide accordingly.
+
+The second scenario is conflicting one and this we can solve in code.
+The second scenario can also happen when the same app is ran twice simultaneously.
+Both the instances will start downloading the same file and this will create a havoc.
+
+*** Solution
+The idea is to have an identifier that an app has already started the download and is still downloading the resouce.
+If the first app has started the download, then wait for the first app to complete the download and then only start the application.
+
+For accomplishing this, we generally use file locking mechanism.
+
+**** Download with file locking
+The process is modified to first create a lock file with extension ~.lock~.
+This lock file signifies that a download is already in progress.
+If this lock file exists then wait for the download to complete by the second app.
+The lock file will have ~processid_threadid~ as identifier.
+This is useful in checking the race condition that can happen while writing the file.
+
+#+begin_src java :noeval
+  public static void downloadFileWithLock(String filePath) {
+    File lockFile = new File(filePath + ".lock");
+    // Check if the file is being downloaded by another app
+    // If it is being downloaded by an another app then wait for the download to finish
+    // Else proceed with the download
+    if (lockFile.exists()) {
+      waitForDownloadToFinish(lockFile);
+    } else {
+      int processID = (int) ProcessHandle.current().pid();
+      String identifier = thread + "_" + processID;
+      String contents = String.valueOf(identifier);
+      writeToFile(lockFile, contents);
+
+      // May be due to race condition, the file is already downloaded by another app
+      // Check if this process started the download
+      String savedIdentifier = readFromFile(lockFile);
+
+      if (identifier.equals(savedIdentifier)) {
+        // Download the file
+        System.out.println(thread + " - Downloading file...");
+        File downloadFile = new File(filePath);
+        try {
+          RandomAccessFile randomAccessFile = new RandomAccessFile(downloadFile, "rw");
+          randomAccessFile.write("Very important works".getBytes());
+          Thread.sleep(5000);
+        }
+        catch (IOException e) {}
+        catch (InterruptedException e) {}
+        System.out.println(thread + " - File downloaded successflly.");
+      } else {
+        waitForDownloadToFinish(lockFile);
+      }
+
+      if (lockFile.exists()) {
+        lockFile.delete();
+      }
+
+    }
+  }
+#+end_src
+
+The Utilities method - ~waitFoDownloadToFinish~, ~readFromFile~ and ~writeToFile~ are as follows.
+#+begin_src java :noeval
+  private static void writeToFile(File file, String contents) {
+    try {
+      Files.write(file.toPath(), contents.getBytes());
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private static String readFromFile(File file) {
+    try {
+      return new String(Files.readAllBytes(file.toPath()));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  private static void waitForDownloadToFinish(File lockFile) {
+    System.out.println(thread + " - File is already being downloaded by another app. Wait for it to finish.");
+    while (lockFile.exists()) {
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+    System.out.println(thread + " - File download completed.");
+  }
+#+end_src
+
+Now you can create 2 new apps that will call this method and we will run the apps simultaneously.
+#+begin_src java :noeval
+public class App1 {
+  public static void main(String[] args) {
+    String filePath = "downloaded_file.txt";
+    FileDownloadUtil.downloadFileWithLock(filePath);
+    System.out.println(Thread.currentThread().getName() + " - App1 starting operation...");
+  }
+}
+#+end_src
+
+#+begin_src java :noeval
+public class App2 {
+  public static void main(String[] args) {
+    String filePath = "downloaded_file.txt";
+    FileDownloadUtil.downloadFileWithLock(filePath);
+    System.out.println(Thread.currentThread().getName() + " - App2 starting operation...");
+  }
+}
+#+end_src
+
+**** Outputs
+#+begin_src bash :noeval
+# For App1
+main - Downloading file...
+main - File downloaded successfully.
+main - App1 starting operation...
+
+# For App2
+main - File is already being downloaded by another app. Wait for it to finish.
+main - File download completed.
+main - App2 starting operation...
+#+end_src
+
+App1 started downloading the file and thus App2 waited for the download to complete.
+After the download completes, both the apps resumed its operations.
+
+*** Conclusion and improvements
+This is just a basic code that lays the foundation of file locking mechanism for downloading a file simultaneously by multiple apps.
+This code is not a production ready code.
+A more complete solution should handle scenarios like downloads in chunks, resume functionality with unexpected shutdowns and other edge cases.
+** DONE Object pool design pattern in Java
+CLOSED: [2024-12-07 Sat 23:04]
+:PROPERTIES:
+:EXPORT_FILE_NAME: object-pool-design-pattern-in-java
+:EXPORT_DATE: <2024-12-07 Sat 21:14>
+:ID: ca002873-f20d-4e65-ad45-1cf66f49f194
+:END:
+*** What is it?
+The object pool design pattern exposes a manager to manage a pool of reusable objects.
+The idea is to keep a know number of reusable objects (with a hard limit to initialize some more lazily).
+Whenever someone need the object from the pool, it will ask the pool manager.
+If there are free objects, the manager will engage one for your.
+If there aren't any free objects but the hard limit is not breached, then the manager will initialize a new object and provide you.
+Else if the hard limit is breached then you will return empty handed.
+
+*** Why is this?
+This is used when we have an resource object which takes some time to initialize.
+And once initialized, it can be reused over and over again without a performance hit.
+
+Basically, creation is expensive and hence we want to reuse already created instances.
+Generally, we put a soft limit on the number of resources initially initialized.
+And we want to create more resources lazily if required.
+To prevent a huge number of resources from being created, we also put a hard limit.
+
+**** Example
+At GreyOrange, we use something called as IDC files.
+These are huge binary files (sometimes 100-200 GBs).
+They provide the time it takes to travel b/w 2 coordinates.
+We created an IDC Manager to parse these files and provide us the required information.
+The initialization takes a huge amount of time (sometimes 10s).
+Once initialized, it takes less than 1ms to provide the information.
+
+Right now, we are good with just once instance of this manager, so it is a singleton class with one buffer linked to an IDC file.
+But if the demands for parallel calls increases, we might want to implement the manager as a Object Pool.
+*** How to implement this?
+There are 3 requirements.
+1. An Object Pool Manager
+2. The initial number of objects - m
+3. The maximum number of objects - n
+
+The Object Pool Manager will be a singleton class.
+We cannot allow multiple Object Pool Manager objects as they will create max, n objects each.
+
+We will create 2 lists, ~availableResources~ and ~enagaedResources~.
+Initially, we will populate the ~availableResources~ with m new resource objects.
+
+Each getter call will check the ~availableResources~ list for available objects.
+If the objects are available then it will move the last object to engagedObjects.
+If the objects are not available then there are 2 choices.
+Check the hard limit, if not reached then create more objects and add to ~availableResources~.
+Else return null.
+
+A pseudo code for the manager is as follows.
+#+begin_src java
+class PoolManager {
+    private static PoolManager instance;
+    private List<Object> availableResources;
+    private List<Object> engagedResources;
+    private Integer initialLimit;
+    private Integer hardLimit;
+
+    private PoolManager() {
+        // Get these properties from already defined config
+        // Assume this is defined as per standard or equivalent configurations
+        initialLimit = Properties.getInstance().getIntegerValue("POOL_INITIAL_LIMIT");
+        hardLimit = Properties.getInstance().getIntegerValue("POOL_HARD_LIMIT");
+
+        availableResources = new ArrayList<>();
+        engagedResources = new ArrayList<>();
+
+        // Initialize the initial number of resources in the pool
+        for (int i=0; i<initialLimit; i++) {
+            availableResources.add(new ResourceObject());
+        }
+    }
+
+    public static PoolManager getInstance() {
+        if (instance == null) {
+            synchronized(PoolManager.class) {
+                if (instance == null) {
+                    instance = new PoolManager();
+                }
+            }
+        }
+
+        return instance;
+    }
+
+    public Object getObject() {
+        if (!availableResources.isEmpty()) {
+            // A sync is required as 2 thread may want to get a free object at the same time
+            synchronized(availableResources) {
+                Object freeObject = availableResources.remove(availableResources.size()-1);
+                engagedResources.add(freeObject);
+                return freeObject;
+            }
+        }
+        else if (engagedResources.size() < hardLimit) {
+            Object freeObject = new ResourceObject();
+            availableResources.add(freeObject);
+            return getObject();
+        }
+        else {
+            return null;
+        }
+    }
+
+    public void releaseObject(Object engagedObject) {
+        if (engagedObject != null) {
+            try {
+                synchronized(engagedResources) {
+                    Object freeObject = engagedResources.remove(engagedObject);
+                    availableResources.add(freeObject);
+                }
+            } catch (Exception e){}
+        }
+    }
+}
+#+end_src
+** TODO AOP in pure Java, keeping logging simple and aside
+:PROPERTIES:
+:EXPORT_FILE_NAME: aop-in-pure-java-keeping-logging-simple-and-aside
+:EXPORT_DATE: <2025-01-04 Sat 00:39>
+:ID: fe968c9d-eeba-4351-87e6-ccf21ff961bb
+:END:
+*** What is this?
+The word "Aspect", means a part of something.
+Aspect Oriented Programming (AOP) deals with managing all those side things which are not the fundamental part of the program.
+
+But what do I really mean by "side things"? And why would anyone want to spend any time programming side things? What's the ROI?
+
+**** Side things
+I will try to describe what I mean by the term "side things" using an example.
+And this will be a long read on one of my personal projects.
+
+***** My personal problem
+So this is a personal project that I am working on right now.
+I use Emacs for my todos using org-agenda.
+It gives you an organized way to mark your deadlines and schedules.
+Each day I before starting my work, I like to look into today's deadlines and schedule the day as per the priority.
+
+2 years back, scheduling my day was not a very hard job.
+My todos list was small and each day I can just make the entire schedule in my brain.
+My tasks were easy, each task was spanning 1-2 hrs and there were hardly any dependencies.
+And I was able to accommodate all my tasks within a day.
+I was free to do whatever I want, whenever I want, however I want.
+
+But now, I can easily see n number of tasks of which I know I can accommodate only m (m<n) number of them today.
+Which m to choose is a decision.
+Then there are dependencies that needs to be taken care of.
+And there are tasks which I cannot handle myself but can be delegated to someone else for an efficient time-resource management.
+And there are some tasks which have crossed the deadline and needs to be re-discussed on a new timeline.
+And there are time bounds and time stretches.
+You cannot go shopping at midnight, but you can stretch learning AOP to maybe till 2 o'clock in morning.
+And cherry on the top, things might get rescheduled due to various reasons.
+
+The 10 mins todo planning now takes me around an hour.
+Planning my day is itself a todo item with daily repetition now.
+
+***** Solution
+As this blog is on AOP, I am not going to discuss the exact low level details on how I approached the solution.
+I only want you to understand the distinction b/w main flow and the side parts of a program.
+
+Automating all the parts of the scheduling was not an option as there are decisions that require my intervention.
+A bird eye view of what I want to achieve is a solution where I can mention all the meta data for a particular task and my program can generate an optimized schedule for the day.
+With this my only task will be to describe how to prioritize a task over the other.
+Also, I want to schedule some tasks manually and I don't want to reassign different time slots for them.
+
+The cool thing about Emacs org mode is that you can define all these metadata under the heading as properties of a todo item.
+
+And to parse them in my Java app I used [[https://github.com/orgzly/org-java][org-java]] package, the same package used by [[https://www.orgzly.com/][Orgzly]] for their android app.
+
+Then I wrote a solver using Timefold (successor of Optaplanner), a constraint optimization problem solver which takes in the features and generates schedule for the day.
+
+The input to the solver is my parsed task items list and the time slots (divided my day into 30 mins slots).
+And it will assign each task to a time slot based on the constraints mentioned.
+
+Again not going in the details, a quick flow of the app is as follows.
+
+#+begin_src plantuml
+@startuml
+Orgfiles -> [OrgFileParser]
+[OrgFileParser] -> [GenerateFeatures]
+[GenerateFeatures] -> [TimefoldPlanner]
+[TimefoldPlanner] -> [Schedules]
+@enduml
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/babel-AsMpds/plantuml-8t3sVt.png]]
+
+***** Main flow vs Side flow
+Up till now, what you have seen are the things I really want to do.
+So this is my picture of the project.
+
+Read all your org files, then parse them, then generate features, then send it to a solver and get the schedules for the day.
+
+And this is my main flow.
+Anything that I will do apart from this is my side work.
+For example, I want to log if org files are parsed properly.
+I want to save the logs on how solver improved my score,
+which is defined under some timefold module and I just want to save the output of that function for future use.
+I also want to write unit tests to make my work unbreakable in future.
+These are my side things for which I don't want to make my main flow dirty.
+
+**** AOP Fundamantals
+Now, there are certain definitions which one should know before diving into AOP.
+Or you may call it AOP 101.
+***** Point Cut and Join points
+
+***** Advice
+
+***** Weaving
+
+*** How to use this in Java?
+**** Maven project setup
+***** Dependnecies
+***** Sample projects
+
+*** More on this
+
+*** Conclusion
+** TODO Julia and basic matrix operations :julia:linear_algebra:matrix:
+:PROPERTIES:
+:EXPORT_FILE_NAME: julia-and-basic-matrix-operations
+:EXPORT_DATE: <2025-01-24 Fri 05:14>
+:ID: 0717aee4-414e-4079-8e60-36284b255dca
+:END:
+*** What is Julia?
+Julia is a scientific programming language.
+It is close to R and Python in syntax and scripting feel.
+But it is more like a light weight MATLAB.
+
+I was going with [[https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-1-the-geometry-of-linear-equations/][Gilbert Strang's lectures on Linear Algebra]] and as always, you can't learn if you are not experimenting.
+I searched for any language support for MATLAB in Doom Emacs.
+Instead I saw this - ~;;julia ; a better, faster MATLAB~.
+
+And my curious mind was like - Why not give this a try?
+And here I am.
+
+I am not a Julia developer yet.
+Maybe I'll be one, given the feel of the language.
+Maybe I'll start saying Julia instead of MATLAB in some days.
+
+Let the future be what it will be.
+Here are some basic matrix operations you can perform in Julia.
+
+*** Installation
+I am using Ubuntu on WSL2 hosted on Windows 11.
+And the following worked for me.
+
+#+begin_src bash :noeval
+wget https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.1-linux-x86_64.tar.gz
+tar zxvf julia-1.8.1-linux-x86_64.tar.gz
+
+# maybe move it to your home directory
+mv julia-1.8.1 ~/julia
+#+end_src
+
+**** Export
+#+begin_src
+# ~/.bashrc or ~/.zshrc
+export PATH="$PATH:/home//julia/bin"
+#+end_src
+
+*** Julia Linear Algebra
+For linear algebra operations, Julia has a library called ~LinearAlgebra~.
+Just like Python where you import your libraries, here you use using keyword.
+
+You can define a matrix very easily as below.
+Let's say you want to define a matrix $A = \begin{bmatrix} 1 & 2 & 3 \\ 4 & 1 & 6 \\ 7 & 8 & 1 \end{bmatrix}$.
+You can just write the elements of a row separated by space and a new row is specified by semi-colon.
+#+begin_src julia :results output
+using LinearAlgebra
+A = [1 2 3; 4 1 6; 7 8 1]
+#+end_src
+
+#+begin_example
+: 3×3 Matrix{Int64}:
+:  1  2  3
+:  4  1  6
+:  7  8  1
+#+end_example
+
+*** Basic Operations
+The operations like finding the trace (tr) or determinant (det) or rank or inverse (inv) can be easily done as follows.
+
+#+begin_src julia :results output
+using LinearAlgebra
+A = [1 2 3; 4 1 6; 7 8 1]
+
+tr(A)
+det(A)
+rank(A)
+inv(A)
+#+end_src
+
+#+begin_example
+3×3 Matrix{Int64}:
+ 1  2  3
+ 4  1  6
+ 7  8  1
+
+// Trace
+3
+
+// Determinant
+104.0
+
+// Rank
+3
+
+// Inverse
+3×3 Matrix{Float64}:
+ -0.451923   0.211538    0.0865385
+  0.365385  -0.192308    0.0576923
+  0.240385   0.0576923  -0.0673077
+#+end_example
+
+Calculation of Eigen values and Eigen vectors are also very easy.
+
+#+begin_src julia :results output
+using LinearAlgebra
+A = [1 2 3; 4 1 6; 7 8 1]
+eigvals(A)
+eigvecs(A)
+#+end_src
+
+#+begin_example
+3×3 Matrix{Int64}:
+ 1  2  3
+ 4  1  6
+ 7  8  1
+
+// Eigen values
+3-element Vector{Float64}:
+ -6.214612641961068
+ -1.5540265964847833
+ 10.768639238445843
+
+// Eigen vectors
+3×3 Matrix{Float64}:
+ -0.175709  -0.766257  -0.344989
+ -0.570057   0.587185  -0.589753
+  0.802596   0.26089   -0.730188
+#+end_example
+
+There are different ways you can factorize a matrix and you can do this in Julia as well.
+
+**** LU Factorization
+LU factorization basically factorizes a matrix A as LU, where L is lower triangular matrix and U is upper triangular matrix.
+
+#+begin_src julia :results output
+using LinearAlgebra
+A = [1 2; 4 5];
+LU=lu(A)
+#+end_src
+
+#+begin_example
+2×2 Matrix{Int64}:
+ 1  2
+ 4  5
+LinearAlgebra.LU{Float64, Matrix{Float64}, Vector{Int64}}
+L factor:
+2×2 Matrix{Float64}:
+ 1.0   0.0
+ 0.25  1.0
+U factor:
+2×2 Matrix{Float64}:
+ 4.0  5.0
+ 0.0  0.75
+#+end_example
+
+**** Eigen value decomposition
+A matrix can be factorized as $S\Lambda S^{-1}$ where $S$ is the Eigen vector matrix and $\Lambda$ is the Eigen values in diagonal matrix.
+
+#+begin_src julia :results output
+using LinearAlgebra
+A = [1 2; 4 5];
+E=eigen(A)
+#+end_src
+
+#+begin_example
+2×2 Matrix{Int64}:
+ 1  2
+ 4  5
+Eigen{Float64, Float64, Matrix{Float64}, Vector{Float64}}
+values:
+2-element Vector{Float64}:
+ -0.4641016151377544
+  6.464101615137754
+vectors:
+2×2 Matrix{Float64}:
+ -0.806898  -0.343724
+  0.59069   -0.939071
+#+end_example
+**** SVD
+SVD or Singular Value Decomposition is a way to factorize a matrix in $u\Sigma v$ form where $u$ and $v$ are some special vectors and $\Sigma$ is a special matrix.
+
+Going in detail about them would only make this blog grow infinitely.
+
+Maybe I should consider writing blogs on mathematical learning in future.
+
+#+begin_src julia :results output
+using LinearAlgebra
+A = [1 2; 4 5];
+SVD=svd(A)
+#+end_src
+
+#+begin_example
+2×2 Matrix{Int64}:
+ 1  2
+ 4  5
+LinearAlgebra.SVD{Float64, Float64, Matrix{Float64}, Vector{Float64}}
+U factor:
+2×2 Matrix{Float64}:
+ -0.324536  -0.945873
+ -0.945873   0.324536
+singular values:
+2-element Vector{Float64}:
+ 6.767828935632369
+ 0.44327361529561016
+Vt factor:
+2×2 Matrix{Float64}:
+ -0.606994  -0.794707
+  0.794707  -0.606994
+#+end_example
+
+*** Conclusion
+Julia has much more to offer.
+This blog was a basic introduction to Julia in Linear Algebra.
+I will keep sharing as I explore more of this language.
