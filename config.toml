@@ -1,4 +1,4 @@
-baseURL = 'https://new-blog-schwiftycold.web.app/'
+baseURL = 'https://blog.shubham.codes/'
 languageCode = 'en-us'
 title = "Shubham's corner"
 theme = "poison"
