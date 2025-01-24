@@ -4,7 +4,7 @@ author = ["Shubham Kumar"]
 date = 2025-01-24T05:14:00+05:30
 tags = ["julia", "linear-algebra", "matrix"]
 categories = ["hugo"]
-draft = true
+draft = false
 +++
 
 ## What is Julia? {#what-is-julia}
