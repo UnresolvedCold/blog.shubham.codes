@@ -225,7 +225,6 @@ cython_debug/
 *.c
 *.cpp
 *.js
-static
 isableFastRender
 .firebase
 public
