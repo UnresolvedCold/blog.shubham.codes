@@ -2,7 +2,7 @@ baseURL = 'https://blog.shubham.codes/'
 languageCode = 'en-us'
 title = "Shubham's corner"
 theme = "poison"
-paginate = 10
+pagination.pagerSize = 10
 pluralizelisttitles = false
 
 [params]

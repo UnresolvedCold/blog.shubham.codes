@@ -25,11 +25,6 @@ jobs:
 
       - name: Build Hugo Website
         run: hugo --destination public
-
-      - name: verify public directory 
-        run : |
-          ls 
-          ls public/ox-hugo
       
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
