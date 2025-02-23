@@ -130,7 +130,7 @@ curl localhost:1313
 > The file main.css here is the processed main.css and will look very different than what we have written.
 
 This is good, next let's see the actual site.
-![](/ox-hugo/blog_tailwind_integration.png)
+![](/images/blog_tailwind_integration.png)
 
 The rendered text is red which means we were finally able to load out Tailwind.
 
