@@ -1,9 +1,10 @@
 +++
 title = "Upgrading Hugo to latest version on Debian based systems"
 author = ["Shubham Kumar"]
-date = 2025-02-23T21:00:00+05:30
+date = 2025-02-23T21:29:00+05:30
+tags = ["hugo", "upgrade", "ubuntu"]
 categories = ["hugo"]
-draft = true
+draft = false
 +++
 
 There is a bad news for Ubuntu (or any Debian based OS) user if you have installed Hugo using `apt`.
