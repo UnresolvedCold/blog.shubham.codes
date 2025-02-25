@@ -43,6 +43,8 @@ You can define your layout as main in other layout files and that block will be 
 </html>
 {{< /highlight >}}
 
+> You can ignore the dashed infront and at last of the decalrations. These are the guide for Hugo to trim spaces infront and back.
+
 
 ## head.html {#head-dot-html}
 
@@ -138,6 +140,10 @@ Now let's modify the `list.html` layout and define main here as well.
 
 {{< highlight bash >}}
 curl localhost:1313/posts/ | grep "main.css"
+{{< /highlight >}}
+
+{{< highlight text >}}
+:         <link rel="stylesheet" href="/css/main.css">
 {{< /highlight >}}
 
 Awesome, we can now use tailwind from anywhere in our website.
