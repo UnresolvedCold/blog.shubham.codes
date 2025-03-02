@@ -866,7 +866,8 @@ In this post we explored partials which is basically a way of reusing the code i
 We learned about ~baseof.html~ which is inherited by all the layouts.
 We combined our tailwind learning with partials and created a ~css.html~ partial which can now be used from anywhere.
 
-** TODO Displaying full content in rss.xml in Hugo
+** DONE Displaying full content in rss.xml in Hugo
+CLOSED: [2025-03-02 Sun 19:20]
 :PROPERTIES:
 :EXPORT_FILE_NAME: displaying-full-content-in-rss-dot-xml-in-hugo
 :EXPORT_DATE: <2025-03-02 Sun 18:45>
@@ -891,6 +892,16 @@ Then change the ~description~ to show content instead of summary as follows.
 +<description>{{ .Content | transform.XMLEscape | safeHTML }}</description>
 #+end_src
 
-#+begin_src bash
+Before the changes there were only 504 characters in the characters.
+#+begin_src bash :results output
+curl localhost:1313/index.xml | grep "description" | head -n 3 | tail -n 1 | wc -c
 
+: 504
+#+end_src
+
+After the changes the number of characters increased significantly as the whole blog is being rendered in the description.
+#+begin_src bash :results output
+curl localhost:1313/index.xml | grep "description" | head -n 3 | tail -n 1 | wc -c
+
+: 14582
 #+end_src
