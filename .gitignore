@@ -228,3 +228,6 @@ cython_debug/
 isableFastRender
 .firebase
 public
+themes/awesometheme
+themes/tailwind
+node_modules

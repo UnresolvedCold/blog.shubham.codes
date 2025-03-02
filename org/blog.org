@@ -3,752 +3,894 @@
 #+HUGO_CODE_FENCE: nil
 
 * Hugo :@hugo:
-** DONE Reflection API in Java :java:reflection_api:
-CLOSED: [2024-06-22 Sat 00:03]
+** DONE Designing my own theme in Hugo - I :hugo:
+CLOSED: [2025-02-15 Sat 07:06]
 :PROPERTIES:
-:EXPORT_FILE_NAME: reflection-api-in-java
-:EXPORT_DATE: <2024-05-19 Sun 08:39>
-:ID: 84663aa1-1445-4fb6-846a-71b6cd888fb7
+:EXPORT_FILE_NAME: designing-my-own-theme-in-hugo-i
+:EXPORT_DATE: <2025-02-11 Tue 08:27>
+:ID: ed010f05-0029-4734-b9dc-0f7920d3a4e4
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER: :series "learninghugo"
 :END:
-*** Where is this used?
-This is used to analyze/modify the behaviour of a class at runtime.
-Using this, you can view or change the private/public fields at wish (without exposing any getter/setter).
-Personally, I have used this in one of our projects at GreyOrange to write unit test cases.
-Using this in main code is a big no-no as it exposed you critical fields to the world.
+*** Hugo is all about themes
+Hugo is a developers dream of static sites.
+Whether you are planning on a new blog site or maybe a documentation for a product, you can easily launch a static site using Hugo.
 
-*** Main Class
-Let's create a main class for which we will write some test cases.
-But we want to test some private fields for which we don't have a direct getter.
-The idea is to use reflection api to access such fields and fetch their current value or modify them if required.
-
-Here is a Duck class which has 3 fields of which 1 is static.
-Each time a duck class is created count which is the static field is increased by one.
-Each duck has an associated name and age.
-
-#+begin_src java :noeval
-public class Duck {
-    private String name;
-    private int age;
-    private static int count = 0;
-
-    public Duck(String name, int age) {
-        this.name = name;
-        this.age = age;
-        count++;
-    }
-
-    public static boolean canCreateMoreDucks() {
-        return count < 10;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public boolean canDrinkAlcohol() {
-        return age >= 18;
-    }
-#+end_src
-*** Test Class -- uses reflection API
-
-**** Change the value of a private field inside a class
-~Field~ and ~getDeclaredField~ are used to access a variable.
-Using ~setAccessible~ as true will expose any private fields which can be manipulated.
-
-#+begin_src java :noeval
-@Test
-public void testDuckCanDrinkAlcohol() {
-    Duck duck = new Duck("Donald", 5);
-    assertEquals("Donald", duck.getName());
-    assertFalse(duck.canDrinkAlcohol());
-
-    // change age and check if duck can drink alcohol
-    // But I don't want to create a setter for this
-    // Use reflection API to change the age
-    try {
-        Class<Duck> duckClass = Duck.class;
-        Field ageField = duckClass.getDeclaredField("age");
-        ageField.setAccessible(true);
-        ageField.setInt(duck, 20);
-    }
-    catch (Exception e) {
-        e.printStackTrace();
-        assert false;
-    }
-
-    assertTrue(duck.canDrinkAlcohol());
-
-}
-#+end_src
-**** Get the value of a static private variable in a class
-A ~static~ field can be accessed in the similar way.
-
-#+begin_src java :noeval
-@Test
-public void testDuckCanCreateMoreDucks() {
-    // Instead of creating more ducks
-    // I will use reflection API to change the count
-    Duck duck = new Duck("Donald", 5);
-    assertTrue(Duck.canCreateMoreDucks());
-
-    // Also assert count was 1
-    // But I don't want to create a getter for this
-    try {
-        Class<Duck> duckClass = Duck.class;
-        Field countField = duckClass.getDeclaredField("count");
-        countField.setAccessible(true);
-
-        // Don't need to pass an instance as count is static
-        Object countObject = countField.get(null);
-        int count  = (int) countObject;
-        assertEquals(1, count);
-    }
-    catch (Exception e) {
-        e.printStackTrace();
-        assert false;
-    }
-}
-#+end_src
-
-**** Change the value of a static private variable in a class
-You can use ~setInt~ to change the value of the ~Field~.
-
-#+begin_src java :noeval
-@Test
-public void testDuckCannotCreateMoreDucks() {
-    // Instead of creating more ducks
-    // I will use reflection API to change the count
-    Duck duck = new Duck("Donald", 5);
-
-    // change count to 10
-    try {
-        Class<Duck> duckClass = Duck.class;
-        Field countField = duckClass.getDeclaredField("count");
-        countField.setAccessible(true);
-        countField.setInt(null, 10);
-    }
-    catch (Exception e) {
-        e.printStackTrace();
-        assert false;
-    }
-
-    assertFalse(Duck.canCreateMoreDucks());
-
-}
-#+end_src
-** TODO Syncing org roam files across devices in WSL2 environment with better performance
-:PROPERTIES:
-:EXPORT_FILE_NAME: syncing-org-roam-files-across-devices-in-wsl2-environment-with-better-performance
-:EXPORT_DATE: <2024-07-28 Sun 06:14>
-:ID: 9a6939c7-3ebe-40f7-ab0f-ff0366f5345e
-:END:
-*** Motivation
-I am using Emacs with ~WSL2~ in ~Windows 11~.
-The org directory is being shared with my other devices within my network.
-This includes my phone and work laptop which are being synced using Syncthing.
-Syncthing is installed on my Windows machine and the org files are stored on the ~D drive~.
-~D drive~ is my non-Windows drive which I generally use to store static contents like recorded videos and digital games.
-This directory is shared with WSL2 instance.
-
-WSL2 has some inherent problem with frequent disk writes.
-It is very slow even on an SSD.
-~org-agenda~ was managable with small number of files but now, it is not managable at all.
-It takes 12s for ~org-agenda~ load all the files intially.
-And it really spoils the mood especially when you are in a hurry to note down the days todos.
-
-*** Idea
-Considering, you won't be writing simultaneously on 2 machine at once.
-The most obvious idea is to run your disc syncs separate from the main thread where you are reading from.
-But the default instance of Emacs does not support multi-threading.
-So I decided to do this in a hacky way.
-
-All I need to do is to run the disc sync separate from my Emacs instance.
-Let Emacs use an org directory from inside my WSL2 instance.
-This way, Emacs won't be waiting for the disc syncs which is making it run slower.
-Now, to sync the instance local directory with the shared org directory, I use unison on both the directories.
-
-This approach seems like the minimal effort way to get my Emacs faster.
-** DONE Downloading a single file from 2 independent apps
-CLOSED: [2024-09-01 Sun 00:11]
-:PROPERTIES:
-:EXPORT_FILE_NAME: downloading-a-single-file-from-2-independent-apps
-:EXPORT_DATE: <2024-08-31 Sat 22:42>
-:ID: 78cc5c43-524a-405e-9198-32e644f32369
-:END:
-*** Understanding the problem
-Let's say you have a very large log file.
-And you want to create an app that can analyze this file and generate insights.
-Also, let's say you want to create an another app that can simulate the work by reading the logs one-by-one.
-
-Both these apps are dependent on the same log file.
-Now, there are 2 scenarios.
-1. App1 starts, downloads the file and then App2 starts.
-2. App1 starts, downloading the file and App2 starts while the download is incomlete.
-
-The first scenario is easy to deal with. We can check the ~md5sum~ of the local file and the file on the server.
-If they match, nothing to worrry about. If they don't then we can have a complex logic to determine the life of the old log file and decide accordingly.
-
-The second scenario is conflicting one and this we can solve in code.
-The second scenario can also happen when the same app is ran twice simultaneously.
-Both the instances will start downloading the same file and this will create a havoc.
-
-*** Solution
-The idea is to have an identifier that an app has already started the download and is still downloading the resouce.
-If the first app has started the download, then wait for the first app to complete the download and then only start the application.
-
-For accomplishing this, we generally use file locking mechanism.
-
-**** Download with file locking
-The process is modified to first create a lock file with extension ~.lock~.
-This lock file signifies that a download is already in progress.
-If this lock file exists then wait for the download to complete by the second app.
-The lock file will have ~processid_threadid~ as identifier.
-This is useful in checking the race condition that can happen while writing the file.
-
-#+begin_src java :noeval
-  public static void downloadFileWithLock(String filePath) {
-    File lockFile = new File(filePath + ".lock");
-    // Check if the file is being downloaded by another app
-    // If it is being downloaded by an another app then wait for the download to finish
-    // Else proceed with the download
-    if (lockFile.exists()) {
-      waitForDownloadToFinish(lockFile);
-    } else {
-      int processID = (int) ProcessHandle.current().pid();
-      String identifier = thread + "_" + processID;
-      String contents = String.valueOf(identifier);
-      writeToFile(lockFile, contents);
-
-      // May be due to race condition, the file is already downloaded by another app
-      // Check if this process started the download
-      String savedIdentifier = readFromFile(lockFile);
-
-      if (identifier.equals(savedIdentifier)) {
-        // Download the file
-        System.out.println(thread + " - Downloading file...");
-        File downloadFile = new File(filePath);
-        try {
-          RandomAccessFile randomAccessFile = new RandomAccessFile(downloadFile, "rw");
-          randomAccessFile.write("Very important works".getBytes());
-          Thread.sleep(5000);
-        }
-        catch (IOException e) {}
-        catch (InterruptedException e) {}
-        System.out.println(thread + " - File downloaded successflly.");
-      } else {
-        waitForDownloadToFinish(lockFile);
-      }
-
-      if (lockFile.exists()) {
-        lockFile.delete();
-      }
-
-    }
-  }
-#+end_src
-
-The Utilities method - ~waitFoDownloadToFinish~, ~readFromFile~ and ~writeToFile~ are as follows.
-#+begin_src java :noeval
-  private static void writeToFile(File file, String contents) {
-    try {
-      Files.write(file.toPath(), contents.getBytes());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  private static String readFromFile(File file) {
-    try {
-      return new String(Files.readAllBytes(file.toPath()));
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return null;
-  }
-
-  private static void waitForDownloadToFinish(File lockFile) {
-    System.out.println(thread + " - File is already being downloaded by another app. Wait for it to finish.");
-    while (lockFile.exists()) {
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-    }
-    System.out.println(thread + " - File download completed.");
-  }
-#+end_src
-
-Now you can create 2 new apps that will call this method and we will run the apps simultaneously.
-#+begin_src java :noeval
-public class App1 {
-  public static void main(String[] args) {
-    String filePath = "downloaded_file.txt";
-    FileDownloadUtil.downloadFileWithLock(filePath);
-    System.out.println(Thread.currentThread().getName() + " - App1 starting operation...");
-  }
-}
-#+end_src
-
-#+begin_src java :noeval
-public class App2 {
-  public static void main(String[] args) {
-    String filePath = "downloaded_file.txt";
-    FileDownloadUtil.downloadFileWithLock(filePath);
-    System.out.println(Thread.currentThread().getName() + " - App2 starting operation...");
-  }
-}
-#+end_src
-
-**** Outputs
+The most powerful feature of Hugo is its simplicity.
+It is designed to separate your content from styling.
+This means you can write your content in normal markdown files independent of all the website pages and layouts.
+The actual design of the website can be stored as a separate theme.
+And as it is independent of the content, you can easily switch themes without ever thinking about your content.
+*** Creating a new theme
+To create a new theme, you can just use the below hugo command.
+It will create a new directory under theme with your theme name.
 #+begin_src bash :noeval
-# For App1
-main - Downloading file...
-main - File downloaded successfully.
-main - App1 starting operation...
-
-# For App2
-main - File is already being downloaded by another app. Wait for it to finish.
-main - File download completed.
-main - App2 starting operation...
+hugo new theme <theme-name>
 #+end_src
 
-App1 started downloading the file and thus App2 waited for the download to complete.
-After the download completes, both the apps resumed its operations.
+The below files will be created on executing the above command.
+Let's get an idea on what are these files in this blog.
 
-*** Conclusion and improvements
-This is just a basic code that lays the foundation of file locking mechanism for downloading a file simultaneously by multiple apps.
-This code is not a production ready code.
-A more complete solution should handle scenarios like downloads in chunks, resume functionality with unexpected shutdowns and other edge cases.
-** DONE Object pool design pattern in Java
-CLOSED: [2024-12-07 Sat 23:04]
-:PROPERTIES:
-:EXPORT_FILE_NAME: object-pool-design-pattern-in-java
-:EXPORT_DATE: <2024-12-07 Sat 21:14>
-:ID: ca002873-f20d-4e65-ad45-1cf66f49f194
-:END:
-*** What is it?
-The object pool design pattern exposes a manager to manage a pool of reusable objects.
-The idea is to keep a know number of reusable objects (with a hard limit to initialize some more lazily).
-Whenever someone need the object from the pool, it will ask the pool manager.
-If there are free objects, the manager will engage one for your.
-If there aren't any free objects but the hard limit is not breached, then the manager will initialize a new object and provide you.
-Else if the hard limit is breached then you will return empty handed.
+#+begin_example
+.
+└── awesometheme
+    ├── LICENSE
+    ├── archetypes
+    │   └── default.md
+    ├── layouts
+    │   ├── 404.html
+    │   ├── _default
+    │   │   ├── baseof.html
+    │   │   ├── list.html
+    │   │   └── single.html
+    │   ├── index.html
+    │   └── partials
+    │       ├── footer.html
+    │       ├── head.html
+    │       └── header.html
+    ├── static
+    │   ├── css
+    │   └── js
+    └── theme.toml
 
-*** Why is this?
-This is used when we have an resource object which takes some time to initialize.
-And once initialized, it can be reused over and over again without a performance hit.
+8 directories, 11 files
+#+end_example
 
-Basically, creation is expensive and hence we want to reuse already created instances.
-Generally, we put a soft limit on the number of resources initially initialized.
-And we want to create more resources lazily if required.
-To prevent a huge number of resources from being created, we also put a hard limit.
+The interesting part are the archetypes and layouts directory.
+The layout directory contains the template for your pages.
+A single page template is defined inside ~single.html~.
+A page containing a list of items like blog posts are defined inside ~list.html~.
 
-**** Example
-At GreyOrange, we use something called as IDC files.
-These are huge binary files (sometimes 100-200 GBs).
-They provide the time it takes to travel b/w 2 coordinates.
-We created an IDC Manager to parse these files and provide us the required information.
-The initialization takes a huge amount of time (sometimes 10s).
-Once initialized, it takes less than 1ms to provide the information.
+The archetypes directory provides the defaults for a type of content.
+When you run ~hugo new content post/learninghugo~, the new file is created using the default template as described in ~archetypes/default.md~, given you don't have any overrides.
+*** Applying the theme
+My blogs are written in Hugo so I can just start experimenting with my blogs theme.
+This way, I can forget about generating any dummy content for my theme.
 
-Right now, we are good with just once instance of this manager, so it is a singleton class with one buffer linked to an IDC file.
-But if the demands for parallel calls increases, we might want to implement the manager as a Object Pool.
-*** How to implement this?
-There are 3 requirements.
-1. An Object Pool Manager
-2. The initial number of objects - m
-3. The maximum number of objects - n
+To tell Hugo to use a theme, you can just update the theme entry in your config.
+My blog site uses toml, so below are the changes.
 
-The Object Pool Manager will be a singleton class.
-We cannot allow multiple Object Pool Manager objects as they will create max, n objects each.
-
-We will create 2 lists, ~availableResources~ and ~enagaedResources~.
-Initially, we will populate the ~availableResources~ with m new resource objects.
-
-Each getter call will check the ~availableResources~ list for available objects.
-If the objects are available then it will move the last object to engagedObjects.
-If the objects are not available then there are 2 choices.
-Check the hard limit, if not reached then create more objects and add to ~availableResources~.
-Else return null.
-
-A pseudo code for the manager is as follows.
-#+begin_src java
-class PoolManager {
-    private static PoolManager instance;
-    private List<Object> availableResources;
-    private List<Object> engagedResources;
-    private Integer initialLimit;
-    private Integer hardLimit;
-
-    private PoolManager() {
-        // Get these properties from already defined config
-        // Assume this is defined as per standard or equivalent configurations
-        initialLimit = Properties.getInstance().getIntegerValue("POOL_INITIAL_LIMIT");
-        hardLimit = Properties.getInstance().getIntegerValue("POOL_HARD_LIMIT");
-
-        availableResources = new ArrayList<>();
-        engagedResources = new ArrayList<>();
-
-        // Initialize the initial number of resources in the pool
-        for (int i=0; i<initialLimit; i++) {
-            availableResources.add(new ResourceObject());
-        }
-    }
-
-    public static PoolManager getInstance() {
-        if (instance == null) {
-            synchronized(PoolManager.class) {
-                if (instance == null) {
-                    instance = new PoolManager();
-                }
-            }
-        }
-
-        return instance;
-    }
-
-    public Object getObject() {
-        if (!availableResources.isEmpty()) {
-            // A sync is required as 2 thread may want to get a free object at the same time
-            synchronized(availableResources) {
-                Object freeObject = availableResources.remove(availableResources.size()-1);
-                engagedResources.add(freeObject);
-                return freeObject;
-            }
-        }
-        else if (engagedResources.size() < hardLimit) {
-            Object freeObject = new ResourceObject();
-            availableResources.add(freeObject);
-            return getObject();
-        }
-        else {
-            return null;
-        }
-    }
-
-    public void releaseObject(Object engagedObject) {
-        if (engagedObject != null) {
-            try {
-                synchronized(engagedResources) {
-                    Object freeObject = engagedResources.remove(engagedObject);
-                    availableResources.add(freeObject);
-                }
-            } catch (Exception e){}
-        }
-    }
-}
+#+begin_src diff
+- theme = "poison"
++ theme = "awesometheme"
 #+end_src
-** TODO AOP in pure Java, keeping logging simple and aside
+
+Now let's run the dev server using ~hugo server --buildDrafts~.
+And I got the below error.
+#+begin_src bash :noeval
+2025-02-15 06:00:39.535 +0530
+ERROR 2025/02/15 06:00:39 render of "section" failed: "/home/cold/Projects/Personal/blog.shubham.codes/layouts/_default/baseof.html:1:3": execute of template failed: template: cv/cv.html:1:3: executing "cv/cv.html" at <partial "head/head.html" .>: error calling partial: partial "head/head.html" not found
+ERROR 2025/02/15 06:00:39 failed to render pages: render of "home" failed: "/home/cold/Projects/Personal/blog.shubham.codes/layouts/_default/baseof.html:1:3": execute of template failed: template: index.html:1:3: executing "index.html" at <partial "head/head.html" .>: error calling partial: partial "head/head.html" not found
+#+end_src
+
+Seems like, I have overridden the [[https://github.com/lukeorth/poison][poison]] theme for customization.
+But now, I am using my own theme which does not contains the poison partials.
+And this is causing the issue.
+
+Both the error corresponds to my layout's directory.
+So let's rename layouts to layouts_.
+And we will need to refactor these layouts as well.
+
+#+begin_quote
+And this is why you should always keep your code loosely coupled
+#+end_quote
+
+#+begin_src bash :noval
+mv layouts layouts_
+#+end_src
+
+And it worked.
+#+begin_src text
+Start building sites …
+hugo v0.92.2+extended linux/amd64 BuildDate=2023-01-31T11:11:57Z VendorInfo=ubuntu:0.92.2-1ubuntu0.1
+
+                   |  EN
+-------------------+-------
+  Pages            |   13
+  Paginator pages  |    0
+  Non-page files   |    0
+  Static files     | 1014
+  Processed images |    0
+  Aliases          |    0
+  Sitemaps         |    1
+  Cleaned          |    0
+
+Built in 88 ms
+Watching for changes in /home/cold/Projects/Personal/blog.shubham.codes/{archetypes,assets,content,data,static,themes}
+Watching for config changes in /home/cold/Projects/Personal/blog.shubham.codes/config.toml
+Environment: "development"
+Serving pages from memory
+Running in Fast Render Mode. For full rebuilds on change: hugo server --disableFastRender
+Web Server is available at http://localhost:1313/ (bind address 127.0.0.1)
+Press Ctrl+C to stop
+#+end_src
+
+But my screen is blank.
+*** Summary
+In this post, we went thorough the basic flow of creating a new theme in Hugo.
+Next, we will learn about layouts and implement the single and list layout for the blog.
+
+** DONE Designing my own theme in Hugo - II :hugo:
+CLOSED: [2025-02-17 Mon 20:32]
 :PROPERTIES:
-:EXPORT_FILE_NAME: aop-in-pure-java-keeping-logging-simple-and-aside
-:EXPORT_DATE: <2025-01-04 Sat 00:39>
-:ID: fe968c9d-eeba-4351-87e6-ccf21ff961bb
+:EXPORT_FILE_NAME: designing-my-own-theme-in-hugo-ii
+:EXPORT_DATE: <2025-02-17 Mon 18:47>
+:ID: 7ec1b0d0-ba73-4bb4-a970-dd645495677f
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER: :series "learninghugo"
 :END:
-*** What is this?
-The word "Aspect", means a part of something.
-Aspect Oriented Programming (AOP) deals with managing all those side things which are not the fundamental part of the program.
+*** What we did and what we will do?
+This is a part blog in which I am documenting my learning process of creating my own theme in Hugo.
+Previously, we went through the basic flow of creating a theme.
+My current theme is poison theme and we replaced the theme with our new theme which we named, "awesometheme".
+But unfortunately, after applying the new theme, the rendered page was blank.
 
-But what do I really mean by "side things"? And why would anyone want to spend any time programming side things? What's the ROI?
+And in this post, we will expand our knowledge of Hugo and lean to render single pages.
+*** Layout and content separation
+Hugo architecture keeps content separate from the layout.
+This allows me to keep my blog post contents as it is and apply a new theme on the top of it.
 
-**** Side things
-I will try to describe what I mean by the term "side things" using an example.
-And this will be a long read on one of my personal projects.
+There are 3 general pages and for each page there is a layout.
+These pages are home page, single page and list pages.
 
-***** My personal problem
-So this is a personal project that I am working on right now.
-I use Emacs for my todos using org-agenda.
-It gives you an organized way to mark your deadlines and schedules.
-Each day I before starting my work, I like to look into today's deadlines and schedule the day as per the priority.
+The home page is the landing page of your site.
+For a blog site, it can be the introductory page with list of recent blogs.
 
-2 years back, scheduling my day was not a very hard job.
-My todos list was small and each day I can just make the entire schedule in my brain.
-My tasks were easy, each task was spanning 1-2 hrs and there were hardly any dependencies.
-And I was able to accommodate all my tasks within a day.
-I was free to do whatever I want, whenever I want, however I want.
+The single page defines a page with content.
+For example, the blogs itself.
 
-But now, I can easily see n number of tasks of which I know I can accommodate only m (m<n) number of them today.
-Which m to choose is a decision.
-Then there are dependencies that needs to be taken care of.
-And there are tasks which I cannot handle myself but can be delegated to someone else for an efficient time-resource management.
-And there are some tasks which have crossed the deadline and needs to be re-discussed on a new timeline.
-And there are time bounds and time stretches.
-You cannot go shopping at midnight, but you can stretch learning AOP to maybe till 2 o'clock in morning.
-And cherry on the top, things might get rescheduled due to various reasons.
+And list pages are the pages that displays the list of items.
+For example, a list of blogs ordered in some preference.
 
-The 10 mins todo planning now takes me around an hour.
-Planning my day is itself a todo item with daily repetition now.
+You can define and customize more pages based on your preference but these are the basic ones.
 
-***** Solution
-As this blog is on AOP, I am not going to discuss the exact low level details on how I approached the solution.
-I only want you to understand the distinction b/w main flow and the side parts of a program.
+As I already have the content ready, let's explore the layout designs first.
 
-Automating all the parts of the scheduling was not an option as there are decisions that require my intervention.
-A bird eye view of what I want to achieve is a solution where I can mention all the meta data for a particular task and my program can generate an optimized schedule for the day.
-With this my only task will be to describe how to prioritize a task over the other.
-Also, I want to schedule some tasks manually and I don't want to reassign different time slots for them.
+*** Homepage
+The home page layout is defined under ~layouts/index.html~.
 
-The cool thing about Emacs org mode is that you can define all these metadata under the heading as properties of a todo item.
+Currently, there isn't anything present in my index.html.
 
-And to parse them in my Java app I used [[https://github.com/orgzly/org-java][org-java]] package, the same package used by [[https://www.orgzly.com/][Orgzly]] for their android app.
+Let's write something arbitrary in it and check if something happens.
 
-Then I wrote a solver using Timefold (successor of Optaplanner), a constraint optimization problem solver which takes in the features and generates schedule for the day.
-
-The input to the solver is my parsed task items list and the time slots (divided my day into 30 mins slots).
-And it will assign each task to a time slot based on the constraints mentioned.
-
-Again not going in the details, a quick flow of the app is as follows.
-
-#+begin_src plantuml
-@startuml
-Orgfiles -> [OrgFileParser]
-[OrgFileParser] -> [GenerateFeatures]
-[GenerateFeatures] -> [TimefoldPlanner]
-[TimefoldPlanner] -> [Schedules]
-@enduml
+#+begin_src html :tangle /home/cold/Projects/Personal/blog.shubham.codes/themes/awesometheme/layouts/index.html
+<html>
+  <head>
+    <title>Shubham's Blog</title>
+  </head>
+  <body>
+    <div>Hi all,</div>
+    <div>How are you guys</div>
+  </body>
+</html>
 #+end_src
 
 #+RESULTS:
-[[file:/tmp/babel-AsMpds/plantuml-8t3sVt.png]]
+: /home/cold/Projects/Personal/blog.shubham.codes/org
 
-***** Main flow vs Side flow
-Up till now, what you have seen are the things I really want to do.
-So this is my picture of the project.
+#+begin_src bash :results output
+curl localhost:1313
+#+end_src
 
-Read all your org files, then parse them, then generate features, then send it to a solver and get the schedules for the day.
+#+begin_example
+<html>
+  <head>
+	<meta name="generator" content="Hugo 0.92.2" /><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <title>Shubham's Blog</title>
+  </head>
+  <body>
+    <div>Hi all,</div>
+    <div>How are you guys</div>
+  </body>
+</html>
+#+end_example
 
-And this is my main flow.
-Anything that I will do apart from this is my side work.
-For example, I want to log if org files are parsed properly.
-I want to save the logs on how solver improved my score,
-which is defined under some timefold module and I just want to save the output of that function for future use.
-I also want to write unit tests to make my work unbreakable in future.
-These are my side things for which I don't want to make my main flow dirty.
+Now, I can see the title and body as I defined.
 
-**** AOP Fundamantals
-Now, there are certain definitions which one should know before diving into AOP.
-Or you may call it AOP 101.
-***** Point Cut and Join points
+*** List Layout
+Let's try to render a list of blogs.
+The ~_default/list.html~ defines a default layout for all the list items.
 
-***** Advice
+I can enter any HTML code and it will be displayed.
+But I want to do something more.
+I want to iterate through all the blog contents which I keep in ~posts~ directory and create a link for the blog page.
 
-***** Weaving
+This is where Hugo uses GoLang's templating library.
+Anything beginning with a ~.~ refers to the current context.
+I will explore more on contexts later.
 
-*** How to use this in Java?
-**** Maven project setup
-***** Dependnecies
-***** Sample projects
+The reference, ~.Pages~ contains a list of all the pages for this section.
+So if, we are referring to posts directory, then ~.Pages~ will contain all the blogs inside the posts directory.
 
-*** More on this
+The for-loop is done using ~range~ keyword.
+The ~range~ keyword iterates through a list and changes the context to the current item.
+So calling ~.Title~ inside the range block will refer to the current blog's title.
 
-*** Conclusion
-** TODO Julia and basic matrix operations :julia:linear_algebra:matrix:
+We can do something as follows.
+
+#+begin_src html :tangle /home/cold/Projects/Personal/blog.shubham.codes/themes/awesometheme/layouts/_default/list.html
+<html>
+  <head>
+    <title>Shubham's Blog</title>
+  </head>
+  <body>
+    <div>List of my recent posts ...</div>
+    <ul>{{range .Pages}}
+      <li>{{.Title}}</li>
+      {{end}}
+    </ul>
+  </body>
+</html>
+#+end_src
+
+#+begin_src bash :results output
+curl http://localhost:1313/posts/
+#+end_src
+
+#+begin_example
+<html>
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <title>Shubham's Blog</title>
+  </head>
+  <body>
+    <div>List of my recent posts ...</div>
+    <ul>
+      <li>Designing my own theme in Hugo - II</li>
+
+      <li>Designing my own theme in Hugo - I</li>
+
+      <li>Julia and basic matrix operations</li>
+
+      <li>AOP in pure Java, keeping logging simple and aside</li>
+
+      <li>Object pool design pattern in Java</li>
+
+      <li>Downloading a single file from 2 independent apps</li>
+
+      <li>Syncing org roam files across devices in WSL2 environment with better performance</li>
+
+      <li>Reflection API in Java</li>
+
+    </ul>
+  </body>
+</html>
+#+end_example
+
+*** Single page layout
+The single pages like the actual blog post layout can be defined inside, ~_default/single.html~
+Same as what we did in the list layout, we can call ~.Content~  to display the content of the current page.
+
+#+begin_src html :tangle /home/cold/Projects/Personal/blog.shubham.codes/themes/awesometheme/layouts/_default/single.html
+<html>
+  <head>
+    <title>Shubham's Blog</title>
+  </head>
+  <body>
+    {{.Content}}
+  </body>
+</html>
+#+end_src
+
+And awesome, I can see my contents as well.
+
+#+begin_src bash :results output
+curl http://localhost:1313/posts/designing-my-own-theme-in-hugo-i/ | head -n 10
+#+end_src
+
+#+begin_example
+<html>
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <title>Shubham's Blog</title>
+  </head>
+  <body>
+    <h2 id="hugo-is-all-about-themes">Hugo is all about themes</h2>
+<p>Hugo is a developers dream of static sites.
+Whether you are planning on a new blog site or maybe a documentation for a product, you can easily launch a static site using Hugo.</p>
+<p>The most powerful feature of Hugo is its simplicity.
+It is designed to separate your content from styling.
+#+end_example
+
+*** Summary
+This post allowed us to display the contents of our blogs.
+We saw, how to design our layout for 3 basic types of pages, homepage, list page and single page.
+We explored some of the GoLang's templating features and got a shallow understanding of contexts.
+Next, let's make our blog more dynamic and good looking.
+** DONE Hugo context
+CLOSED: [2025-02-21 Fri 06:26]
 :PROPERTIES:
-:EXPORT_FILE_NAME: julia-and-basic-matrix-operations
-:EXPORT_DATE: <2025-01-24 Fri 05:14>
-:ID: 0717aee4-414e-4079-8e60-36284b255dca
+:EXPORT_FILE_NAME: hugo-context
+:EXPORT_DATE: <2025-02-18 Tue 05:57>
+:ID: 9e5be423-2df4-4c10-966a-b34aeedb812a
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER: :series "learninghugo"
 :END:
-*** What is Julia?
-Julia is a scientific programming language.
-It is close to R and Python in syntax and scripting feel.
-But it is more like a light weight MATLAB.
+*** What we did and what we will do?
+Previously, we were successfully able to render our home, single and list pages.
+When we started templating, we looked into a term called, ~context~.
+We worked with site context and page context and I assumed they are just like references.
+This post is meant to explore more on ~context~ and get a deeper understanding.
 
-I was going with [[https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-1-the-geometry-of-linear-equations/][Gilbert Strang's lectures on Linear Algebra]] and as always, you can't learn if you are not experimenting.
-I searched for any language support for MATLAB in Doom Emacs.
-Instead I saw this - ~;;julia ; a better, faster MATLAB~.
+*** Context
+The Context is the object available to you at anytime.
+This means, if you are in a single page then the context available to you will be the contents of the page, it's title and other related information.
+On one of the list pages, the context will contain a collection of items.
 
-And my curious mind was like - Why not give this a try?
-And here I am.
+**** Title and Contents
 
-I am not a Julia developer yet.
-Maybe I'll be one, given the feel of the language.
-Maybe I'll start saying Julia instead of MATLAB in some days.
+There are some page related contexts like ~.Title~ and ~.Contents~ which can be used form any one of the layouts.
+I can change the ~index.html~ or ~single.html~ or ~list.html~ and print the title and contents.
+I do not have any content in my home page and lists pages right now, so the body will be blank.
+But for, any one of the blogs we can check the contents being rendered.
 
-Let the future be what it will be.
-Here are some basic matrix operations you can perform in Julia.
+#+begin_src html
+<html>
+  <head>
+    <title>
+      {{ .Title }}
+    </title>
+  </head>
+  <body>
+    {{ .Content }}
+  </body>
+</html>
+#+end_src
 
-*** Installation
-I am using Ubuntu on WSL2 hosted on Windows 11.
-And the following worked for me.
+#+begin_src bash :results output
+curl http://localhost:1313/posts/designing-my-own-theme-in-hugo-ii/ | head -n 10
+#+end_src
+
+#+begin_example
+<html>
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <title>
+      Designing my own theme in Hugo - II
+    </title>
+  </head>
+  <body>
+    <h2 id="what-we-did-and-what-we-will-do">What we did and what we will do?</h2>
+<p>This is a part blog in which I am documenting my learning process of creating my own theme in Hugo.
+Previously, we went through the basic flow of creating a theme.
+#+end_example
+
+**** Accessing the site contexts
+If you want to access the site related information, like the title for your site or any property defined for your site in ~config.toml~, you can use the ~.Site~ context.
+Basically, each page contains a data related to your site inside ~{{ .Site }}~ object.
+
+Changing the title to ~{{ .Site.Title }}~ started displaying me the site's name, which is ~Shubham's corner~.
+
+#+begin_src html
+<html>
+  <head>
+    <title>
+      {{ .Site.Title }}
+    </title>
+  </head>
+  <body>
+    {{ .Content }}
+  </body>
+</html>
+#+end_src
+
+#+begin_src bash :results output
+curl http://localhost:1313/posts/designing-my-own-theme-in-hugo-ii/ | head -n 10
+#+end_src
+
+#+begin_example
+<html>
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <title>
+      Shubham&#39;s corner
+    </title>
+  </head>
+  <body>
+    <h2 id="what-we-did-and-what-we-will-do">What we did and what we will do?</h2>
+<p>This is a part blog in which I am documenting my learning process of creating my own theme in Hugo.
+Previously, we went through the basic flow of creating a theme.
+#+end_example
+
+**** Change of contexts
+There are certain functions which changes the current context.
+If we want to iterate over all the pages in page list.
+Then you use ~range~ method.
+The ~range~ method provides you an iterator for you collection.
+
+If I want to display the title of all the collections in my posts.
+I can provide a ~range~ block as follows.
+
+#+begin_src html
+<body>
+  {{ range .Pages }}
+  {{ end }}
+</body>
+#+end_src
+
+~.Pages~ provides me a collection of page objects for each of the pages in the list.
+In between the blocks, my context is changed to the currently iterated page.
+
+This means, calling ~.Title~ in b/w the blocks will render the title of pages in collection one-by-one.
+#+begin_src html
+<body>
+  <ul>
+  {{ range .Pages }}
+  <li>{{ .Title }}</li>
+  {{ end }}
+  </ul>
+</body>
+#+end_src
+
+#+begin_src bash :results output
+curl http://localhost:1313/posts/
+#+end_src
+
+#+begin_example
+<html>
+  <body>
+    <ul>
+
+    <li>Hugo context</li>
+
+    <li>Designing my own theme in Hugo - II</li>
+
+    <li>Designing my own theme in Hugo - I</li>
+
+    <li>Julia and basic matrix operations</li>
+
+    <li>AOP in pure Java, keeping logging simple and aside</li>
+
+    <li>Object pool design pattern in Java</li>
+
+    <li>Downloading a single file from 2 independent apps</li>
+
+    <li>Syncing org roam files across devices in WSL2 environment with better performance</li>
+
+    <li>Reflection API in Java</li>
+
+    </ul>
+  </body>
+
+</html>
+#+end_example
+
+You can still access the global contexts by using the ~$~ symbol.
+
+~$.Title~ will refer to the title of this page.
+
+~$.Site.Title~ will refer to the site's title.
+
+#+begin_src html :results output
+ <li>{{ $.Site.Title }} - {{ $.Title }} - {{ .Title }}</li>
+#+end_src
+
+#+begin_src bash :results output
+curl http://localhost:1313/posts/
+#+end_src
+
+#+begin_example
+<html>
+  <body>
+    <ul>
+
+    <li>Shubham&#39;s corner - Posts - Hugo context</li>
+
+    <li>Shubham&#39;s corner - Posts - Designing my own theme in Hugo - II</li>
+
+    <li>Shubham&#39;s corner - Posts - Designing my own theme in Hugo - I</li>
+
+    <li>Shubham&#39;s corner - Posts - Julia and basic matrix operations</li>
+
+    <li>Shubham&#39;s corner - Posts - AOP in pure Java, keeping logging simple and aside</li>
+
+    <li>Shubham&#39;s corner - Posts - Object pool design pattern in Java</li>
+
+    <li>Shubham&#39;s corner - Posts - Downloading a single file from 2 independent apps</li>
+
+    <li>Shubham&#39;s corner - Posts - Syncing org roam files across devices in WSL2 environment with better performance</li>
+
+    <li>Shubham&#39;s corner - Posts - Reflection API in Java</li>
+
+    </ul>
+  </body>
+
+</html>
+#+end_example
+
+*** Summary
+In this post, we explored in depth on contexts.
+We saw, ~{{ . }}~ refers to the current context.
+For pages, the context provides the title and other related information.
+We also witnessed the change of context while using ~range~ function and also used ~$~ symbol to get the global context.
+Next, we will explore styling the site using CSS.
+** DONE Upgrading Hugo to latest version on Debian based systems :hugo:upgrade:ubuntu:
+CLOSED: [2025-02-23 Sun 21:29]
+:PROPERTIES:
+:EXPORT_FILE_NAME: upgrading-hugo-to-latest-version-on-debian-based-systems
+:EXPORT_DATE: <2025-02-23 Sun 21:00>
+:ID: fa064daf-6d8d-448f-845a-5c6b474d6412
+:END:
+
+There is a bad news for Ubuntu (or any Debian based OS) user if you have installed Hugo using ~apt~.
+The official ~apt~ repository is not being updated continuously.
+
+Today, I wanted to experiment with the Tailwind support introduced in Hugo ~0.128.0~.
+But the apt package manager does not has this version.
+The latest version is ~0.92.2~ as of now.
+
+#+begin_src bash :results output
+apt list -a hugo
+#+end_src
+
+#+begin_example
+: Listing...
+: hugo/jammy-updates,jammy-security,now 0.92.2-1ubuntu0.1 amd64 [installed]
+: hugo/jammy 0.92.2-1 amd64
+#+end_example
+
+In such scenarios, you can install the ~.deb~ file directly from the published releases.
+The disadvantage of this method is, you will lose the ability to upgrade the version automatically.
+In the future, you will be restricted to download the ~deb~ file and install the updated version.
+
+Anyways, here are the steps to do so.
+
+First look for the latest (or the version you want) to install at the GoHugoIO release page - https://github.com/gohugoio/hugo/releases
+
+At the time of writing this post, the latest version is ~0.144.2~.
+Any my current version is ~0.92.2~.
+
+#+begin_src bash :results output :noeval
+hugo version
+#+end_src
+
+#+begin_example
+: hugo v0.92.2+extended linux/amd64 BuildDate=2023-01-31T11:11:57Z VendorInfo=ubuntu:0.92.2-1ubuntu0.1
+#+end_example
+
+
+From the Downloads directory, I can run the below command to download the deb file that I want to install.
+You can use any directory to download this file. Generally people use ~/tmp~, but I like all my downloads in my ~Downloads~ directory.
+
+#+begin_src bash :results output :dir ~/Downloads
+wget https://github.com/gohugoio/hugo/releases/download/v0.144.2/hugo_0.144.2_linux-amd64.deb
+#+end_src
+
+
+Next you can install the ~deb~ file as follows.
+
+#+begin_src bash :results output :dir ~/Downloads
+ls | grep hugo
+#+end_src
+
+#+begin_example
+: hugo_0.144.2_linux-amd64.deb
+#+end_example
+
+#+begin_src bash :results output :dir /sudo::/home/cold/Downloads
+dpkg -i hugo_0.144.2_linux-amd64.deb
+#+end_src
+
+This should upgrade your installation to latest.
+
+#+begin_src bash :results output
+hugo version
+#+end_src
+
+#+begin_example
+: hugo v0.144.2-098c68fd18f48031a7145bedab30cbaede48858f linux/amd64 BuildDate=2025-02-19T12:17:04Z VendorInfo=gohugoio
+#+end_example
+
+Hope this will help you upgrading Hugo to latest version on Debian based systems.
+** DONE Tailwind support in Hugo
+CLOSED: [2025-02-23 Sun 22:27]
+:PROPERTIES:
+:EXPORT_FILE_NAME: tailwind-support-in-hugo
+:EXPORT_DATE: <2025-02-23 Sun 20:26>
+:ID: b7628f4d-e265-496c-8503-31e0dabc3206
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER: :series "learninghugo"
+:END:
+*** Expectations from this post
+With the version ~0.128.0~, Hugo started supporting Tailwind internally.
+In this post, let's configure Tailwind and display some text in red.
+
+*** Tailwind and other supporting apps
+
+We will install the below 4 packages.
+1. tailwindcss - This is the core Tailwind library and is required for using tailwind
+2. tailwind/cli - This is a CLI tool for Tailwind that helps in building tailwind styles
+3. postcss - This is a library to process CSS with JavaScript plugins.
+4. autoprefixer - This is a postcss library that helps in automatically generating the vendor prefixes like ~-webkit-~ and ~-moz-~.
+
+We will install these packages as dev as they play no role after building the site.
 
 #+begin_src bash :noeval
-wget https://julialang-s3.julialang.org/bin/linux/x64/1.8/julia-1.8.1-linux-x86_64.tar.gz
-tar zxvf julia-1.8.1-linux-x86_64.tar.gz
-
-# maybe move it to your home directory
-mv julia-1.8.1 ~/julia
+npm install --save-dev tailwindcss @tailwindcss/cli postcss autoprefixer
 #+end_src
 
-**** Export
-#+begin_src
-# ~/.bashrc or ~/.zshrc
-export PATH="$PATH:/home//julia/bin"
+*** PostCSS config
+
+You need to specify the plugins for ~postcss~.
+This can be done by creating a file, ~postcss.config.js~.
+You can add the plugins you want to use here as follows.
+
+For now, we will add ~tailwindcss~ and ~autoprefixer~ as the plugins.
+
+#+begin_src javascript
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+};
 #+end_src
 
-*** Julia Linear Algebra
-For linear algebra operations, Julia has a library called ~LinearAlgebra~.
-Just like Python where you import your libraries, here you use using keyword.
+*** Tailwind config
+We can create a more advanced config for Tailwind later.
 
-You can define a matrix very easily as below.
-Let's say you want to define a matrix $A = \begin{bmatrix} 1 & 2 & 3 \\ 4 & 1 & 6 \\ 7 & 8 & 1 \end{bmatrix}$.
-You can just write the elements of a row separated by space and a new row is specified by semi-colon.
-#+begin_src julia :results output
-using LinearAlgebra
-A = [1 2 3; 4 1 6; 7 8 1]
+For now, let's just create a file, ~tailwind.config~ without any contents in the theme's root directory.
+
+*** Loading Tailwind on the index page
+Let's first create a resource ~main.css~ in the assets directory of the theme.
+Here we will import Tailwind and then we will load this resource in our index file using some Hugo magic.
+
+**** main.css
+In the theme's root directory, let's create a directory ~assets/css~ and add a file ~main.css~ here.
+
+The content of the file will just load the Tailwind library.
+
+#+begin_src css
+@import "tailwindcss";
 #+end_src
 
-#+begin_example
-: 3×3 Matrix{Int64}:
-:  1  2  3
-:  4  1  6
-:  7  8  1
-#+end_example
+**** index.html
 
-*** Basic Operations
-The operations like finding the trace (tr) or determinant (det) or rank or inverse (inv) can be easily done as follows.
+Here, we just want to add ~main.css~ as our stylesheet.
 
-#+begin_src julia :results output
-using LinearAlgebra
-A = [1 2 3; 4 1 6; 7 8 1]
+This is done by using ~link~ tag.
 
-tr(A)
-det(A)
-rank(A)
-inv(A)
+First we want to load the resource then we want to process it using tailwind and add it to our page.
+
+We can use Hugo's ~with~ function to load the file and again using ~with~, we can process the obtained file using tailwind.
+The below snippet will do the trick.
+
+~{{ with resources.Get "css/main.css" }}~ will try to get the main.css file. Hugo will look into the assets direcetry for ~css/main.css~.
+~{{ with . }}~ will only be processed if the file was found.
+And if found we can pipe the contents to be processed by ~css.TailwindCSS~ provided by Hugo.
+
+#+begin_src html
+{{ with resources.Get "css/main.css" }}
+    {{ with . | css.TailwindCSS }}
+        <link rel="stylesheet" href="{{ .RelPermalink }}">
+    {{ end }}
+{{ end }}
 #+end_src
 
-#+begin_example
-3×3 Matrix{Int64}:
- 1  2  3
- 4  1  6
- 7  8  1
+This would be enough to start using Tailwind functionalities.
 
-// Trace
-3
+To test if it is working of not, we can add a simple text and use some tailwind features to make it red.
 
-// Determinant
-104.0
+Inside the ~index.html~, body let's add the following. Adding class as ~text-red-500~, should turn the content of ~<p>~ to red.
 
-// Rank
-3
-
-// Inverse
-3×3 Matrix{Float64}:
- -0.451923   0.211538    0.0865385
-  0.365385  -0.192308    0.0576923
-  0.240385   0.0576923  -0.0673077
-#+end_example
-
-Calculation of Eigen values and Eigen vectors are also very easy.
-
-#+begin_src julia :results output
-using LinearAlgebra
-A = [1 2 3; 4 1 6; 7 8 1]
-eigvals(A)
-eigvecs(A)
+#+begin_src html
+<p class="text-red-500">This paragraph is red.</p>
 #+end_src
 
-#+begin_example
-3×3 Matrix{Int64}:
- 1  2  3
- 4  1  6
- 7  8  1
-
-// Eigen values
-3-element Vector{Float64}:
- -6.214612641961068
- -1.5540265964847833
- 10.768639238445843
-
-// Eigen vectors
-3×3 Matrix{Float64}:
- -0.175709  -0.766257  -0.344989
- -0.570057   0.587185  -0.589753
-  0.802596   0.26089   -0.730188
-#+end_example
-
-There are different ways you can factorize a matrix and you can do this in Julia as well.
-
-**** LU Factorization
-LU factorization basically factorizes a matrix A as LU, where L is lower triangular matrix and U is upper triangular matrix.
-
-#+begin_src julia :results output
-using LinearAlgebra
-A = [1 2; 4 5];
-LU=lu(A)
+*** Taking a peek
+Let's first curl the homepage and verify of link was created successfully.
+#+begin_src bash :results output
+curl localhost:1313
 #+end_src
 
 #+begin_example
-2×2 Matrix{Int64}:
- 1  2
- 4  5
-LinearAlgebra.LU{Float64, Matrix{Float64}, Vector{Int64}}
-L factor:
-2×2 Matrix{Float64}:
- 1.0   0.0
- 0.25  1.0
-U factor:
-2×2 Matrix{Float64}:
- 4.0  5.0
- 0.0  0.75
+<html>
+  <head>
+	<meta name="generator" content="Hugo 0.144.2"><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    <title>
+      Shubham&#39;s corner
+    </title>
+        <link rel="stylesheet" href="/css/main.css">
+  </head>
+  <body>
+    <p class="text-red-500">This paragraph is red.</p>
+  </body>
+</html>
 #+end_example
 
-**** Eigen value decomposition
-A matrix can be factorized as $S\Lambda S^{-1}$ where $S$ is the Eigen vector matrix and $\Lambda$ is the Eigen values in diagonal matrix.
+#+begin_quote
+The file main.css here is the processed main.css and will look very different than what we have written.
+#+end_quote
 
-#+begin_src julia :results output
-using LinearAlgebra
-A = [1 2; 4 5];
-E=eigen(A)
+This is good, next let's see the actual site.
+[[file:../static/images/blog_tailwind_integration.png]]
+
+The rendered text is red which means we were finally able to load out Tailwind.
+*** Summary
+In this post, we saw how to enable the support of Tailwind CSS in out Hugo site.
+We added some text and turned it to red using Tailwind classes.
+Next, we will explore code re-usability in Hugo which is where partials come to play.
+** DONE Partials in Hugo
+CLOSED: [2025-02-25 Tue 20:09]
+:PROPERTIES:
+:EXPORT_FILE_NAME: partials-in-hugo
+:EXPORT_DATE: <2025-02-25 Tue 18:31>
+:ID: 32273d4d-efeb-4a88-9f49-8cc9479b8244
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER: :series "learninghugo"
+:END:
+*** Partials and code reusability
+Hugo provides a nice mechanism to separate your components and stitch them at different places.
+This means you can design your components like nav-bar or menu bar and stitch them in all of your layouts.
+Earlier, we wrote some code to load tailwind in our index page.
+But we do not want to write this boilerplate code for all our pages.
+Instead we should have defined the tailwind loader code in a component and call it from all the layouts.
+Actually, we should have called the boilerplate code from ~baseof.html~ from which all other layouts are inherited.
+*** baseof.html
+
+When we created the theme, a special file was created for us, ~baseof.html~.
+Every other layout inherits ~baseof.html~.
+
+If you look at the contents of ~baseof.html~ which was generated for use.
+You will find 3 partial sections, head, header and footer.
+These are the default standards but you will go on creating partials as your code base becomes more complex.
+
+The main block denoted by ~{{ block "main" . }}~, is where your content from other pages will be inserted.
+You can define your layout as main in other layout files and that block will be inserted here.
+
+#+begin_src html
+<!DOCTYPE html>
+<html>
+    {{- partial "head.html" . -}}
+    <body>
+        {{- partial "header.html" . -}}
+        <div id="content">
+        {{- block "main" . }}{{- end }}
+        </div>
+        {{- partial "footer.html" . -}}
+    </body>
+</html>
+#+end_src
+
+#+begin_quote
+You can ignore the dashed infront and at last of the decalrations. These are the guide for Hugo to trim spaces infront and back.
+#+end_quote
+
+*** head.html
+After ~html~ tag we have a partial ~head.html~ instead of a head tag.
+Hugo is smart enough to generate ~head~ attribute from the partial.
+Looking closely, it just process your partials and replaces the partial block with it.
+
+We could have defined out tailwind loading code here as follows.
+Now we got the support for tailwind everywhere in our site.
+You can also define some meta tags or other libraries here.
+#+begin_src html
+<head>
+  {{ with resources.Get "css/main.css" }}
+  {{ with . | css.TailwindCSS }}
+      <link rel="stylesheet" href="{{ .RelPermalink }}">
+  {{ end }}
+  {{ end }}
+</head>
+#+end_src
+
+*** Defining custom partials
+Defining partials is as easy as it can be.
+You just need to create a file under ~partials~ directory.
+And write whatever processing you want to do.
+And include it in you main layout using ~{{ partial "your-file.html" . }}~.
+You can pass any data along with your partial definition.
+In the above partial definition, we are passing the current context to our partial.
+
+*** Make CSS styling a partial
+Let's create a new partial by creating a file called ~css.html~.
+This will contain the logic to process and import our tailwind libraray.
+
+The contents of ~css.html~ will be as follows.
+
+#+begin_src html
+{{ with resources.Get "css/main.css" }}
+{{ with . | css.TailwindCSS }}
+    <link rel="stylesheet" href="{{ .RelPermalink }}">
+{{ end }}
+{{ end }}
+#+end_src
+
+And our head block will include this as a partial as follows.
+The below code goes inside ~baseof.html~.
+
+#+begin_src html
+<head>
+  {{ partial "css.html" . }}
+</head>
+#+end_src
+
+*** Modify the pages to use baseof
+You will need to define the ~main~ block in all your layouts.
+This will help Hugo to link the contents of layouts page and combine it with baseof to generate the rendered page.
+
+Below is how, I modified my ~index.html~ page.
+
+#+begin_src html
+{{ define "main" }}
+  <p class="text-red-500">This paragraph is red.</p>
+  {{ .Content }}
+{{ end }}
+#+end_src
+
+#+begin_src bash :results output
+curl localhost:1313 | grep "main.css"
 #+end_src
 
 #+begin_example
-2×2 Matrix{Int64}:
- 1  2
- 4  5
-Eigen{Float64, Float64, Matrix{Float64}, Vector{Float64}}
-values:
-2-element Vector{Float64}:
- -0.4641016151377544
-  6.464101615137754
-vectors:
-2×2 Matrix{Float64}:
- -0.806898  -0.343724
-  0.59069   -0.939071
+:         <link rel="stylesheet" href="/css/main.css">
 #+end_example
-**** SVD
-SVD or Singular Value Decomposition is a way to factorize a matrix in $u\Sigma v$ form where $u$ and $v$ are some special vectors and $\Sigma$ is a special matrix.
 
-Going in detail about them would only make this blog grow infinitely.
+This looks as expected. We can see out main.css linked to our homepage.
 
-Maybe I should consider writing blogs on mathematical learning in future.
+Now let's modify the ~list.html~ layout and define main here as well.
 
-#+begin_src julia :results output
-using LinearAlgebra
-A = [1 2; 4 5];
-SVD=svd(A)
+#+begin_src html
+{{ define "main" }}
+  <ul>
+    {{ range .Pages }}
+    <li>{{ $.Site.Title }} - {{ $.Title }} - {{ .Title }}</li>
+    {{ end }}
+  </ul>
+{{ end }}
+#+end_src
+
+
+#+begin_src bash :results output
+curl localhost:1313/posts/ | grep "main.css"
 #+end_src
 
 #+begin_example
-2×2 Matrix{Int64}:
- 1  2
- 4  5
-LinearAlgebra.SVD{Float64, Float64, Matrix{Float64}, Vector{Float64}}
-U factor:
-2×2 Matrix{Float64}:
- -0.324536  -0.945873
- -0.945873   0.324536
-singular values:
-2-element Vector{Float64}:
- 6.767828935632369
- 0.44327361529561016
-Vt factor:
-2×2 Matrix{Float64}:
- -0.606994  -0.794707
-  0.794707  -0.606994
+:         <link rel="stylesheet" href="/css/main.css">
 #+end_example
 
-*** Conclusion
-Julia has much more to offer.
-This blog was a basic introduction to Julia in Linear Algebra.
-I will keep sharing as I explore more of this language.
+Awesome, we can now use tailwind from anywhere in our website.
+
+*** Summary
+In this post we explored partials which is basically a way of reusing the code in Hugo.
+We learned about ~baseof.html~ which is inherited by all the layouts.
+We combined our tailwind learning with partials and created a ~css.html~ partial which can now be used from anywhere.
+
+** TODO Displaying full content in rss.xml in Hugo
+:PROPERTIES:
+:EXPORT_FILE_NAME: displaying-full-content-in-rss-dot-xml-in-hugo
+:EXPORT_DATE: <2025-03-02 Sun 18:45>
+:ID: 5b8cf498-4854-45d6-8dc4-9f911bd35ff7
+:EXPORT_HUGO_CUSTOM_FRONT_MATTER: :series "learninghugo"
+:END:
+
+Create a new file at ~layouts/_default/rss.xml~.
+You can define your ~rss.xml~ as per your liking.
+
+By default ~rss.xml~ only displays the summary of your articles.
+But I want to display the whole content.
+This helps me in syncing my posts with my ~dev.to~ site.
+
+You can find the Hugo's default ~rss.xml~ at [[https://github.com/gohugoio/hugo/blob/master/tpl/tplimpl/embedded/templates/_default/rss.xml][Hugo's Github repo]].
+Let's copy the contents to our ~rss.xml~ file that we just created.
+
+Then change the ~description~ to show content instead of summary as follows.
+
+#+begin_src diff
+-<description>{{ .Summary | transform.XMLEscape | safeHTML }}</description>
++<description>{{ .Content | transform.XMLEscape | safeHTML }}</description>
+#+end_src
+
+#+begin_src bash
+
+#+end_src
