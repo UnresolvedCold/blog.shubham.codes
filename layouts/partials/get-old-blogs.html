@@ -1,0 +1,20 @@
+<ul class="entries">
+  {{ $jsonResource := resources.Get "data/astro.json" }}
+  {{ if $jsonResource }}
+      {{ $rss := $jsonResource | transform.Unmarshal }}
+      {{ if $rss.items }}
+          {{ range $rss.items }}
+              <li>
+                  <span class="title">
+                      <a href="{{ .link }}" target="_blank">{{ .title }}</a>
+                  </span>
+                  <span class="published">
+                      <time class="pull-right post-list">
+                          {{ dateFormat ":date_long" .pubDate }}
+                      </time>
+                  </span>
+              </li>
+          {{ end }}
+      {{ end }}
+  {{ end }}
+</ul>

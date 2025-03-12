@@ -8,8 +8,13 @@ draft: false
 
 # I'm Shubham 
 
-### Senior Engineer - Software Development (MTS)
+### Welcome to My Corner of the Internet
 
-This is the corner of the internet where I share my learnings, thoughts and experiences. 
+I'm someone who thrives on problem-solving, whether it's in software architecture, AI/ML, or optimization. 
+Beyond code, I have a deep curiosity for psychology, biology, and seemingly unrelated fields—because connections often lie where we least expect them.
 
-Here are some interesting things that caught my attention recently.
+This space is where I share my learnings, insights, and experiences—bridging technology with a broader perspective. Stick around, and let's explore together.
+
+If interested, you can find more about me [here](/about). 
+
+---
