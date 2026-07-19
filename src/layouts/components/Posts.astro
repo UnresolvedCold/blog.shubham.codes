@@ -28,7 +28,9 @@ const { className, posts, fluid } = Astro.props;
             class="rounded-lg block hover:text-primary overflow-hidden group"
           >
             <Image
-              class="group-hover:scale-[1.03] transition duration-300 w-full"
+              class={`group-hover:scale-[1.03] transition duration-300 w-full object-cover ${
+                i === 0 && fluid != false ? "h-[320px]" : "h-[180px]"
+              }`}
               src={post.data.image}
               alt={post.data.title}
               width={i === 0 ? 925 : 445}

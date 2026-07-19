@@ -1,0 +1,206 @@
+---
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="/admin/config.yml" type="text/yaml" rel="cms-config-url" />
+    <title>Content Manager</title>
+  </head>
+  <body>
+    <script is:inline>
+      window.CMS_MANUAL_INIT = true;
+    </script>
+    <script
+      is:inline
+      src="https://unpkg.com/decap-cms@^3.1.2/dist/decap-cms.js"></script>
+    <script is:inline>
+      CMS.registerPreviewStyle(
+        `
+          body {
+            background: #ffffff;
+            color: #202124;
+            font-family:
+              Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+              "Segoe UI", sans-serif;
+            line-height: 1.7;
+            margin: 0;
+            padding: 32px;
+          }
+
+          .cms-preview {
+            max-width: 760px;
+            margin: 0 auto;
+          }
+
+          .cms-preview img {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 24px auto;
+          }
+
+          .cms-preview .featured-image {
+            height: 512px;
+            object-fit: cover;
+          }
+
+          .cms-preview h1 {
+            color: #111827;
+            font-size: 40px;
+            line-height: 1.15;
+            margin: 0 0 12px;
+          }
+
+          .cms-preview .meta {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 24px;
+          }
+
+          .cms-preview .description {
+            color: #374151;
+            font-size: 18px;
+            margin-bottom: 24px;
+          }
+
+          .cms-preview .body {
+            margin-top: 28px;
+          }
+
+          .cms-preview .content-image {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 24px auto;
+          }
+
+          .cms-preview .content-image-small {
+            max-width: 320px;
+          }
+
+          .cms-preview .content-image-medium {
+            max-width: 560px;
+          }
+
+          .cms-preview .content-image-large {
+            max-width: 100%;
+          }
+
+          .cms-preview .content-image-align-left {
+            margin-left: 0;
+            margin-right: auto;
+          }
+
+          .cms-preview .content-image-align-center {
+            margin-left: auto;
+            margin-right: auto;
+          }
+
+          .cms-preview .content-image-align-right {
+            margin-left: auto;
+            margin-right: 0;
+          }
+
+          .cms-preview img[title~="small"] {
+            max-width: 320px;
+          }
+
+          .cms-preview img[title~="medium"] {
+            max-width: 560px;
+          }
+
+          .cms-preview img[title~="large"] {
+            max-width: 100%;
+          }
+
+          .cms-preview img[title~="left"] {
+            margin-left: 0;
+            margin-right: auto;
+          }
+
+          .cms-preview img[title~="center"] {
+            margin-left: auto;
+            margin-right: auto;
+          }
+
+          .cms-preview img[title~="right"] {
+            margin-left: auto;
+            margin-right: 0;
+          }
+        `,
+        { raw: true },
+      );
+
+      var toArray = function (value) {
+        if (!value) return [];
+        if (typeof value.toJS === "function") return value.toJS();
+        if (Array.isArray(value)) return value;
+        return [value];
+      };
+
+      var getImageSource = function (props, image) {
+        if (!image) return "";
+        var asset = props.getAsset(image);
+        return asset ? asset.toString() : image;
+      };
+
+      var PostPreview = createClass({
+        render: function () {
+          var entry = this.props.entry;
+          var title = entry.getIn(["data", "title"]) || "Untitled";
+          var description = entry.getIn(["data", "description"]);
+          var date = entry.getIn(["data", "date"]);
+          var image = getImageSource(this.props, entry.getIn(["data", "image"]));
+          var categories = toArray(entry.getIn(["data", "categories"]));
+
+          return h(
+            "article",
+            { className: "cms-preview" },
+            h("h1", {}, title),
+            h(
+              "div",
+              { className: "meta" },
+              [date, categories.join(", ")].filter(Boolean).join(" | "),
+            ),
+            description ? h("p", { className: "description" }, description) : null,
+            image ? h("img", { src: image, alt: title, className: "featured-image" }) : null,
+            h("div", { className: "body" }, this.props.widgetFor("body")),
+          );
+        },
+      });
+
+      var PagePreview = createClass({
+        render: function () {
+          var entry = this.props.entry;
+          var title = entry.getIn(["data", "title"]) || "Untitled";
+          var description = entry.getIn(["data", "description"]);
+          var image = getImageSource(this.props, entry.getIn(["data", "image"]));
+
+          return h(
+            "article",
+            { className: "cms-preview" },
+            h("h1", {}, title),
+            description ? h("p", { className: "description" }, description) : null,
+            image ? h("img", { src: image, alt: title }) : null,
+            h("div", { className: "body" }, this.props.widgetFor("body")),
+          );
+        },
+      });
+
+      CMS.registerPreviewTemplate("posts", PostPreview);
+      CMS.registerPreviewTemplate("pages", PagePreview);
+      CMS.registerPreviewTemplate("authors", PagePreview);
+      CMS.registerPreviewTemplate("about", PagePreview);
+      CMS.registerPreviewTemplate("contact", PagePreview);
+
+      CMS.init();
+    </script>
+  </body>
+</html>
