@@ -1,24 +1,53 @@
-# build output
-dist/
-.output/
-
-# dependencies
+# Dependencies
 node_modules/
 
-# logs
+# Build output
+dist/
+.output/
+.vercel/
+
+# Astro and Vite caches
+.astro/
+.vite/
+node_modules/.vite/
+
+# Firebase and Cloudflare local state
+.firebase/
+.firebaserc.local
+.wrangler/
+.dev.vars
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Logs
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
+bun-debug.log*
+lerna-debug.log*
+
+# Runtime and coverage output
+coverage/
+.nyc_output/
+tmp/
+temp/
+*.tsbuildinfo
+
+# Package-manager noise
 package-lock.json
+yarn.lock
 
-
-# environment variables
-.env
-.env.production
-
-# macOS-specific files
+# OS files
 .DS_Store
+Thumbs.db
 
-# ignore .astro directory
-.astro
+# Editor local files
+*.swp
+*.swo
+*~
