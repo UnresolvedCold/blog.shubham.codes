@@ -1,23 +1,23 @@
 ---
-title: "I’m John Doe, A content writer based in LDN, Currently at Bookworm"
+title: "I am Shubham Kumar"
 meta_title: "About"
-image: "/images/author.png"
+image: "/images/authors/shubham-kumar.jpg"
 draft: false
 
 what_i_do:
-  title: "What I Do"
+  title: "What I Pay Attention To"
   items:
-  - title: "Content Writing"
-    description: "Purus eget ipsum elementum venenatis, quis rutrum mi semper nonpurus eget ipsum elementum venenatis."
+  - title: "Software"
+    description: "Building practical systems, improving developer workflows, and writing down the decisions that matter."
   
-  - title: "Photography"
-    description: "Aenean maximus urna magna elementum, quis rutrum mi semper non purus eget ipsum venenatis."
+  - title: "Food"
+    description: "Cooking as a repeatable craft: ingredients, timing, constraints, and small improvements."
   
-  - title: "Web Research"
-    description: "Aenean maximus urna magna elementum venenatis, quis semper non purus eget ipsum venenatis."
+  - title: "Travel"
+    description: "Notes from places, logistics, costs, and the details that make a trip easier the next time."
 
 ---
 
-A content writer with over 12 years experience working across brand identity, publishing and digital products. Maecenas sit amet purus eget ipsum elementum venenatis. Aenean maximus urna magna elementum venenatis quis non purus.
+I use this site as a public notebook for things I want to understand clearly enough to explain. Most of the writing will sit somewhere between technical notes, personal systems, recipes, travel planning, and lessons from projects.
 
-Purus eget ipsum elementum venenatis. Aenean maximus urna magna elementum venenatis, quis rutrum mi semper non purus eget ipsum elementum venenatis, aenean maximus urna magna elementum.
+The goal is simple: make useful observations durable. If an idea, bug, workflow, meal, or trip taught me something worth keeping, it belongs here.

@@ -1,8 +1,8 @@
 ---
 title: "Privacy"
 meta_title: ""
-description: "this is meta description"
-draft: false
+description: "Draft privacy policy."
+draft: true
 ---
 
 #### Responsibility of Contributors
