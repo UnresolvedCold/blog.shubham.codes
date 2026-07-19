@@ -1,3 +1,24 @@
 {
-  "main": []
+  "main": [
+    {
+      "name": "GitHub",
+      "icon": "FaGithub",
+      "link": "https://github.com/unresolvedcold"
+    },
+    {
+      "name": "LinkedIn",
+      "icon": "FaLinkedin",
+      "link": "https://linkedin.com/in/schwiftycold"
+    },
+    {
+      "name": "X",
+      "icon": "FaXTwitter",
+      "link": "https://twitter.com/schwiftycold"
+    },
+    {
+      "name": "Email",
+      "icon": "FaEnvelope",
+      "link": "mailto:contact@shubham.codes"
+    }
+  ]
 }

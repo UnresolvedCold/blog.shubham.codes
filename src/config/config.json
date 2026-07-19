@@ -1,7 +1,7 @@
 {
   "site": {
-    "title": "Shubham Kumar",
-    "base_url": "https://shubhamkumar.dev",
+    "title": "Shubham's Corner",
+    "base_url": "https://blog.shubham.codes",
     "base_path": "/",
     "trailing_slash": false,
     "favicon": "/images/favicon.png",
@@ -17,13 +17,13 @@
 
   "metadata": {
     "meta_author": "Shubham Kumar",
-    "meta_image": "/images/og-image.png",
-    "meta_description": "Notes from Shubham Kumar on software, systems, cooking, travel, and the habits behind useful work."
+    "meta_image": "/images/profile.png",
+    "meta_description": "Senior Software Development Engineer writing about backend systems, AI/ML, DevOps, Hugo, Astro, and practical engineering notes."
   },
 
   "google_tag_manager": {
     "enable": false,
-    "gtm_id": "GTM-XXXXXX"
+    "gtm_id": ""
   },
 
   "params": {
@@ -32,8 +32,8 @@
   },
 
   "contactinfo": {
-    "address": "",
-    "email": "",
+    "address": "Gurugram, India",
+    "email": "[contact@shubham.codes](mailto:contact@shubham.codes)",
     "phone": ""
   }
 }

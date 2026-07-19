@@ -6,7 +6,7 @@ date: 2026-07-20T00:00:00+05:30
 categories: ["personal"]
 authors: ["Shubham Kumar"]
 tags: ["meta", "writing"]
-draft: false
+draft: true
 ---
 
 This site starts as a simple place to write things down before they get scattered across chats, notes, bookmarks, and half-finished drafts.

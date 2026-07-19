@@ -5,6 +5,10 @@
       "url": "/"
     },
     {
+      "name": "CV",
+      "url": "/cv"
+    },
+    {
       "name": "About",
       "url": "/about"
     },
@@ -17,6 +21,10 @@
     {
       "name": "Home",
       "url": "/"
+    },
+    {
+      "name": "CV",
+      "url": "/cv"
     },
     {
       "name": "About",

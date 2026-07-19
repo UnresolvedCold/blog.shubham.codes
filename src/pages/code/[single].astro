@@ -1,0 +1,35 @@
+---
+import { getSinglePage } from "@/lib/contentParser.astro";
+
+export async function getStaticPaths() {
+  const posts = await getSinglePage("posts");
+  const codePosts = posts.filter((post) => post.data.categories.includes("code"));
+
+  return codePosts.map((post) => ({
+    params: {
+      single: post.id,
+    },
+  }));
+}
+
+const { single } = Astro.params;
+const destination = `/blog/${single}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content={`0; url=${destination}`} />
+    <link rel="canonical" href={destination} />
+    <title>Redirecting...</title>
+  </head>
+  <body>
+    <p>
+      Redirecting to <a href={destination}>{destination}</a>.
+    </p>
+    <script is:inline define:vars={{ destination }}>
+      window.location.replace(destination);
+    </script>
+  </body>
+</html>
