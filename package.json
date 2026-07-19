@@ -6,7 +6,8 @@
   "packageManager": "pnpm@11.9.0",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/compress-images.mjs",
+    "compress:images": "node scripts/compress-images.mjs",
     "preview": "astro preview",
     "format": "prettier -w .",
     "check": "astro check",

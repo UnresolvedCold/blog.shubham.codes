@@ -16,6 +16,8 @@ bun run check
 bun run build
 ```
 
+`bun run build` runs `astro build` and then compresses raster images in `dist` with Sharp. Source images in `public/images` are not modified; only production build output is recompressed, and files are replaced only when the compressed version is smaller.
+
 ## Content
 
 - Site config: `src/config/config.json`
