@@ -1,7 +1,7 @@
 ---
 title: "Omelette Recipie"
 description: "\"Just started cooking while living in PG, tried simplest Omelette"
-pubDate: 2026-07-20T02:43:00.000+05:30
+pubDate: 2026-07-20
 draft: false
 ---
 
