@@ -1,29 +1,33 @@
 ---
 title: "About"
-meta_title: "About"
+meta_title: "About Shubham Kumar"
 image: "/images/profile.png"
 draft: false
 
 what_i_do:
   title: "What I Work On"
   items:
-  - title: "Backend Systems"
-    description: "Distributed systems, services, data flows, and production reliability."
-  - title: "AI and Optimization"
-    description: "Scheduling, simulation, path finding, and practical machine learning workflows."
-  - title: "DevOps"
-    description: "Build automation, deployments, cloud operations, and developer productivity."
+  - title: "Autonomous Robot Intelligence"
+    description: "Task scheduling, fleet orchestration, path finding, and optimization for warehouse automation."
+  - title: "Backend Platforms"
+    description: "Distributed services, simulation tooling, data flows, and production reliability."
+  - title: "AI-Assisted Engineering"
+    description: "Context-rich automation for estimation, delivery planning, build systems, and developer workflows."
 
 ---
 
 # **Profile**
-Senior Software Development Engineer with 3 years of full-time experience (6 years including internships and personal ventures). Specialized in backend development, AI/ML, and DevOps with a strong focus on optimization and cloud operations.
+I am Shubham Kumar, a Senior Software Development Engineer at GreyOrange in Gurugram. My current work is centered on the decision-making layer of autonomous robot fleets: task scheduling, multi-agent path finding, simulation, backend services, and the tooling needed to keep those systems moving in production.
+
+My public LinkedIn profile frames this as architecting the brain of robot fleets, which is a useful shorthand for the kind of engineering I enjoy: systems where algorithms, services, infrastructure, and product constraints all meet. I also experiment with AI-assisted engineering workflows, especially where good context can turn repeated planning or estimation work into something faster and more reliable.
+
+You can also find me on [LinkedIn](https://linkedin.com/in/schwiftycold) and [GitHub](https://github.com/unresolvedcold).
 
 ---
 
 ## **Education**
-- **MS Mathematics**, BITS Pilani, Goa (2017-2022)  
-- **BE Electrical and Electronics Engineering**, BITS Pilani, Goa (2017-2022)  
+- **MS Mathematics**, BITS Pilani, Goa (2017-2022)
+- **BE Electrical and Electronics Engineering**, BITS Pilani, Goa (2017-2022)
 
 ---
 
@@ -52,31 +56,36 @@ Senior Software Development Engineer with 3 years of full-time experience (6 yea
 - Built gender recognition and sentiment analysis models.
 - Analyzed Speech-to-Text APIs for performance and accuracy.
 
-### **Web Developer Intern** (Dec 2019 - Feb 2020)  
-**Eople, Pune, India**  
-- Implemented Firebase Cloud and TextLocal APIs.
-- Developed OTP authentication modules.
-
-### **Electrical Engineering Intern** (May 2019 - Jul 2019)  
-**Rourkela Steel Plant, SAIL, India**  
-- Studied SCADA system and power division islanding.
-
 ---
 
 ## **Ventures**
 ### **OrderUp** (May 2019 - Nov 2019)  
 A digital ordering system for restaurants and malls using QR-based menu browsing and ordering. 
 
+### **Configuration of State of Art Substation** (May 2019 - Jul 2019)
+Electrical engineering project work around substation systems and industrial power infrastructure.
+
 ### **BITS Eats** (Jan 2019 - May 2019)  
 Campus-wide food ordering and delivery platform reducing crowding and optimizing payments.
 
 ---
 
+## **Recognition**
+- Spirit of Learning, GreyOrange (Oct 2024)
+- Extra Mile Award, GreyOrange (Q2 2023-24)
+- Xela-thon bronze award, Exela Technologies (Sep 2021)
+
+---
+
 ## **Certifications**
+- Java From Basics to Advanced, Udemy (Aug 2024)
+- Getting Started with Spring Boot, Amigoscode (Apr 2022)
+- Workshop on Artificial Intelligence Application for Electro Optical Sensors, BITS Pilani (Feb 2022)
 - Amazon Machine Learning School (2021-22)
-- WAIAEOS (BITS Pilani)
-- Intro to Technical Analysis (SEBI, Quark BITS Pilani)
-- Amazon Cloud Computing Cloud Professional (SEBI, Quark BITS Pilani)
+- International Workshop on Recent Advancements in Data Envelopment Analysis and Applications, BITS Pilani (Jul 2021)
+- Deep Learning with GANs, Jovian (Jan 2021)
+- Introduction to Cloud, Cognitive Class (Jun 2020)
+- Data Science, Coursera (Apr 2019)
 
 ---
 
@@ -95,3 +104,9 @@ Campus-wide food ordering and delivery platform reducing crowding and optimizing
 
 ### **Others**
 - PostgreSQL, Mulesoft, Node-Red, SCADA
+
+---
+
+## **Languages**
+- English, full professional proficiency
+- Hindi, native or bilingual proficiency

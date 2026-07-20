@@ -4,7 +4,13 @@ import Base from "@/layouts/Base.astro";
 import { markdownify } from "@/lib/utils/textConverter";
 import type { CollectionEntry } from "astro:content";
 import { getEntry, render } from "astro:content";
-import { FaAddressCard, FaEnvelope, FaPhoneAlt } from "react-icons/fa";
+import {
+  FaAddressCard,
+  FaEnvelope,
+  FaInstagram,
+  FaLinkedin,
+  FaPhoneAlt,
+} from "react-icons/fa";
 
 const entry = (await getEntry(
   "contact",
@@ -12,7 +18,7 @@ const entry = (await getEntry(
 )) as CollectionEntry<"contact">;
 const { Content } = await render(entry);
 const { contact_form_action } = config.params;
-const { address, email, phone } = config.contactinfo;
+const { address, email, phone, linkedin, instagram } = config.contactinfo;
 const { title, description, meta_title, image } = entry.data;
 const contactItems = [
   {
@@ -29,6 +35,16 @@ const contactItems = [
     label: "Phone",
     value: phone,
     icon: FaPhoneAlt,
+  },
+  {
+    label: "LinkedIn",
+    value: linkedin,
+    icon: FaLinkedin,
+  },
+  {
+    label: "Instagram",
+    value: instagram,
+    icon: FaInstagram,
   },
 ].filter((item) => item.value);
 const hasContactForm = contact_form_action && contact_form_action !== "#";

@@ -18,7 +18,7 @@
   "metadata": {
     "meta_author": "Shubham Kumar",
     "meta_image": "/images/profile.png",
-    "meta_description": "Senior Software Development Engineer writing about backend systems, AI/ML, DevOps, Hugo, Astro, and practical engineering notes."
+    "meta_description": "Senior Software Development Engineer writing about autonomous robot fleets, backend systems, AI/ML, DevOps, Astro, and practical engineering notes."
   },
 
   "google_tag_manager": {
@@ -34,6 +34,8 @@
   "contactinfo": {
     "address": "Gurugram, India",
     "email": "[contact@shubham.codes](mailto:contact@shubham.codes)",
-    "phone": ""
+    "phone": "",
+    "linkedin": "[@schwiftycold](https://linkedin.com/in/schwiftycold)",
+    "instagram": "[@schwiftycold](https://instagram.com/schwiftycold)"
   }
 }
