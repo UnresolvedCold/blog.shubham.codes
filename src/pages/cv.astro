@@ -1,0 +1,306 @@
+---
+import Base from "@/layouts/Base.astro";
+import {
+  FaDownload,
+  FaEnvelope,
+  FaGithub,
+  FaLinkedin,
+  FaMapMarkerAlt,
+  FaPhoneAlt,
+} from "react-icons/fa";
+
+const pdfPath = "/files/shubham-kumar-software-development-4yoe-fullstack.pdf";
+
+const skills = [
+  {
+    label: "Languages & Backend",
+    value:
+      "Java 8-21, Spring Boot, REST APIs, Microservices, Multithreading, Concurrency, Python",
+  },
+  {
+    label: "Frontend",
+    value:
+      "React, TypeScript, JavaScript, API Integration, Forms, Dashboards",
+  },
+  {
+    label: "Architecture",
+    value:
+      "Distributed Systems, Event-Driven Design, System Design, Domain Modeling, Scalable Application Frameworks",
+  },
+  {
+    label: "Optimization & AI/ML",
+    value:
+      "OptaPlanner, Timefold, Constraint Modeling, Heuristic Optimization, Predictive Modeling, ML Service Integration",
+  },
+  {
+    label: "Infrastructure & DevOps",
+    value: "Kubernetes, Docker, GitHub Actions, Jenkins, CI/CD Pipelines, Linux",
+  },
+  {
+    label: "Data & Observability",
+    value:
+      "Kafka, RabbitMQ, PostgreSQL, Redis, InfluxDB, Prometheus, Grafana, Loki",
+  },
+  {
+    label: "Engineering Practices",
+    value:
+      "Debugging, Code Reviews, Technical Mentorship, Cross-functional Collaboration, Production Support",
+  },
+];
+
+const experience = [
+  {
+    company: "GreyOrange Pvt Ltd",
+    role: "SDE 3 | Senior Member of Technical Staff",
+    meta: "July 2022 - Present | Gurugram, India",
+    bullets: [
+      "Built and owned Java-based backend components for large-scale warehouse robotics orchestration, coordinating bots, totes, workstations, and fulfillment workflows across production deployments.",
+      "Owned MVTS, a multi-fleet task scheduling system responsible for assigning work across heterogeneous robot fleets while handling queue limits, bot availability, task priority, and operational constraints.",
+      "Developed and tuned task-scheduling algorithms using OptaPlanner and Timefold, integrating optimization logic into production-grade backend workflows with metrics, configuration controls, and debugging support.",
+      "Built Spring Boot services for transit-time prediction with retraining and inference APIs, RabbitMQ-based asynchronous workflows, MinIO-backed model storage, Kubernetes deployment, and InfluxDB metrics.",
+      "Optimized solver configurations, multithreaded execution paths, and backend processing flows to improve throughput, latency, and runtime stability in high-volume warehouse scenarios.",
+      "Improved production debugging through structured logs, metrics, dashboards, alerts, reproducible problem statements, and invariant checks for complex scheduling and runtime anomalies.",
+      "Migrated 20 repositories from Jenkins to GitHub Actions, creating reusable build, test, artifact, and notification workflows that improved build speed and developer experience.",
+      "Mentored 2 SDE-1 engineers, reviewed designs and code, and collaborated with product architects, QA, deployment, contract discussions, and engineering teams to deliver customer-facing production features.",
+    ],
+  },
+];
+
+const ventures = [
+  {
+    name: "BITS Eats & OrderUp",
+    role: "Technical Lead & Architect",
+    meta: "2019 - 2020",
+    text: "Designed and launched a campus delivery platform with inventory, ordering, and dispatch workflows for the BITS Pilani student community.",
+  },
+  {
+    name: "Genpact",
+    role: "AI Engineering Internship",
+    meta: "2022",
+    text: "Worked on AI/ML systems for customer call centers, learned data warehousing for ML development operations, and contributed to speech emotion detection models.",
+  },
+];
+
+const awards = [
+  "Excellence product ownership, GreyOrange (2026) - For demonstrating outstanding ownership, collaboration, and commitment towards Walmart's Proof of Technology.",
+  "Spirit of Learning Award, GreyOrange (2024) - For driving technical innovation and learning initiatives.",
+  "Extra Mile Award, GreyOrange (2023) - For excellence in system stability and engineering ownership.",
+  "Amazon ML Summer School (2020).",
+  "Bronze Medalist, Xela-Thon (2020).",
+];
+
+const contacts = [
+  {
+    label: "+91 7004219327",
+    href: "tel:+917004219327",
+    icon: FaPhoneAlt,
+  },
+  {
+    label: "unresolved.shubham@gmail.com",
+    href: "mailto:unresolved.shubham@gmail.com",
+    icon: FaEnvelope,
+  },
+  {
+    label: "linkedin.com/in/schwiftycold",
+    href: "https://linkedin.com/in/schwiftycold",
+    icon: FaLinkedin,
+  },
+  {
+    label: "github.com/unresolvedcold",
+    href: "https://github.com/unresolvedcold",
+    icon: FaGithub,
+  },
+];
+---
+
+<Base
+  title="CV"
+  meta_title="Shubham Kumar - SDE 3 CV"
+  description="Software Development Engineer 3 resume for Shubham Kumar, focused on backend systems, warehouse robotics, optimization, AI/ML, and full-stack engineering."
+>
+  <section class="section pb-12">
+    <div class="container">
+      <div class="mb-12 flex flex-col gap-8 border-b border-border pb-10 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p class="mb-4 text-sm font-bold uppercase text-primary">
+            Curriculum Vitae
+          </p>
+          <h1 class="mb-5 text-4xl font-bold leading-tight text-text-dark md:text-5xl">
+            Shubham Kumar
+          </h1>
+          <p class="max-w-3xl text-xl font-semibold leading-8 text-text-dark">
+            SDE 3 at GreyOrange building Java backend systems, distributed
+            workflows, optimization platforms, and AI/ML-integrated production
+            systems.
+          </p>
+        </div>
+        <a
+          class="btn btn-primary inline-flex items-center justify-center gap-3 text-white"
+          href={pdfPath}
+          download
+        >
+          <FaDownload />
+          Download PDF
+        </a>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        {
+          contacts.map((item) => {
+            const Icon = item.icon;
+            return (
+              <a
+                class="flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-text-dark transition hover:border-primary hover:text-primary"
+                href={item.href}
+                target={item.href.startsWith("http") ? "_blank" : undefined}
+                rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
+              >
+                <Icon className="shrink-0 text-primary" />
+                <span>{item.label}</span>
+              </a>
+            );
+          })
+        }
+        <div class="flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-text-dark">
+          <FaMapMarkerAlt className="shrink-0 text-primary" />
+          <span>Gurugram, India</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section pt-0">
+    <div class="container">
+      <div class="grid gap-12 lg:grid-cols-[minmax(0,1.45fr)_minmax(280px,0.75fr)]">
+        <div class="space-y-12">
+          <section>
+            <h2 class="mb-5 text-2xl font-bold text-text-dark">
+              Professional Summary
+            </h2>
+            <div class="content">
+              <p>
+                SDE 3 at GreyOrange and BITS Pilani alum with 4 years of
+                experience building Java backend systems, distributed workflows,
+                RESTful services, optimization platforms, and AI/ML-integrated
+                production systems. Strong background in Spring Boot,
+                event-driven architecture, debugging complex systems, CI/CD, and
+                scalable application design.
+              </p>
+              <p>
+                Backend-heavy full-stack engineer with practical exposure to
+                React and TypeScript for dashboards, workflows, and API-driven
+                interfaces. Experienced in mentoring engineers and collaborating
+                across product, AI, QA, and deployment teams to deliver
+                customer-centered software.
+              </p>
+            </div>
+          </section>
+
+          <section>
+            <h2 class="mb-5 text-2xl font-bold text-text-dark">
+              Professional Experience
+            </h2>
+            <div class="space-y-8">
+              {
+                experience.map((item) => (
+                  <article class="border-l-4 border-primary pl-5">
+                    <div class="mb-4">
+                      <h3 class="text-xl font-bold text-text-dark">
+                        {item.company}
+                      </h3>
+                      <p class="font-semibold text-text-dark">{item.role}</p>
+                      <p class="text-sm text-text">{item.meta}</p>
+                    </div>
+                    <ul class="space-y-3">
+                      {item.bullets.map((bullet) => (
+                        <li class="flex gap-3 leading-7 text-text">
+                          <span class="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                          <span>{bullet}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </article>
+                ))
+              }
+            </div>
+          </section>
+
+          <section>
+            <h2 class="mb-5 text-2xl font-bold text-text-dark">
+              Personal Ventures & Past Internships
+            </h2>
+            <div class="space-y-6">
+              {
+                ventures.map((item) => (
+                  <article class="rounded-lg border border-border p-5">
+                    <div class="mb-3 flex flex-col gap-1 md:flex-row md:items-start md:justify-between">
+                      <div>
+                        <h3 class="text-lg font-bold text-text-dark">
+                          {item.name}
+                        </h3>
+                        <p class="font-semibold text-text-dark">{item.role}</p>
+                      </div>
+                      <p class="text-sm font-semibold text-primary">
+                        {item.meta}
+                      </p>
+                    </div>
+                    <p class="leading-7 text-text">{item.text}</p>
+                  </article>
+                ))
+              }
+            </div>
+          </section>
+        </div>
+
+        <aside class="space-y-10">
+          <section>
+            <h2 class="mb-5 text-2xl font-bold text-text-dark">
+              Technical Skills
+            </h2>
+            <div class="space-y-4">
+              {
+                skills.map((skill) => (
+                  <div class="rounded-lg bg-light p-4">
+                    <h3 class="mb-2 font-bold text-text-dark">
+                      {skill.label}
+                    </h3>
+                    <p class="text-sm leading-6 text-text">{skill.value}</p>
+                  </div>
+                ))
+              }
+            </div>
+          </section>
+
+          <section>
+            <h2 class="mb-5 text-2xl font-bold text-text-dark">Education</h2>
+            <div class="rounded-lg border border-border p-5">
+              <h3 class="font-bold text-text-dark">BITS Pilani</h3>
+              <p class="mt-1 text-sm font-semibold text-primary">
+                2017 - 2022
+              </p>
+              <p class="mt-3 leading-7 text-text">
+                M.Sc. Mathematics & B.E. Electrical and Electronics, Dual
+                Degree, Goa, India.
+              </p>
+            </div>
+          </section>
+
+          <section>
+            <h2 class="mb-5 text-2xl font-bold text-text-dark">
+              Honors & Awards
+            </h2>
+            <ul class="space-y-3">
+              {
+                awards.map((award) => (
+                  <li class="rounded-lg border border-border p-4 leading-7 text-text">
+                    {award}
+                  </li>
+                ))
+              }
+            </ul>
+          </section>
+        </aside>
+      </div>
+    </div>
+  </section>
+</Base>

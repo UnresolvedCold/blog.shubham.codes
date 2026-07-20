@@ -87,26 +87,6 @@ collections:
   - name: "site_sections"
     label: "Site Sections"
     files:
-      - label: "About"
-        name: "about"
-        file: "src/content/about/-index.md"
-        fields:
-          - { label: "Title", name: "title", widget: "string" }
-          - { label: "Meta Title", name: "meta_title", widget: "string", required: false }
-          - { label: "Image", name: "image", widget: "image", required: false }
-          - { label: "Draft", name: "draft", widget: "boolean", default: false, required: false }
-          - label: "What I Do"
-            name: "what_i_do"
-            widget: "object"
-            fields:
-              - { label: "Title", name: "title", widget: "string" }
-              - label: "Items"
-                name: "items"
-                widget: "list"
-                fields:
-                  - { label: "Title", name: "title", widget: "string" }
-                  - { label: "Description", name: "description", widget: "text" }
-          - { label: "Body", name: "body", widget: "markdown" }
       - label: "Contact"
         name: "contact"
         file: "src/content/contact/-index.md"
