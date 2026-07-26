@@ -39,7 +39,7 @@ answer = 9
 
 For every index, scan the full left side and full right side to find the tallest wall on both sides. Then add the water contributed by the current index.
 
-![](/images/uploads/trapping-rain-water-01-brute-force-wall-scan.gif)
+![](/images/uploads/trapping-rain-water-01-brute-force-wall-scan.gif "medium center")
 
 This works because every index is handled independently, but it repeats a lot of work. For each bar we are scanning the array again.
 
@@ -85,7 +85,7 @@ The repeated work in brute force is finding the same left and right walls again 
 
 `rightWalls[i]` stores the highest wall from `i` to `n - 1`.
 
-![](/images/uploads/trapping-rain-water-02-prefix-suffix-walls.gif)
+![](/images/uploads/trapping-rain-water-02-prefix-suffix-walls.gif "medium center")
 
 Once these two arrays are ready, the water at every index can be calculated in one pass.
 
@@ -128,7 +128,7 @@ We can avoid the extra arrays by keeping two pointers, one from the left and one
 
 The useful observation is that water is limited by the smaller wall. If `leftMax < rightMax`, then the left side can be settled because there is already a right wall tall enough to support it. Similarly, if `rightMax < leftMax`, the right side can be settled.
 
-![](/images/uploads/trapping-rain-water-03-two-pointer-settle.gif)
+![](/images/uploads/trapping-rain-water-03-two-pointer-settle.gif "medium center")
 
 ```java
 class Solution {
