@@ -2,17 +2,18 @@
 title: "[Neetcode] Trapping Rain Water"
 meta_title: Trapping Rain Water
 description: "Draft notes for solving Trapping Rain Water from brute force, to precomputed walls, to the two pointer solution."
-date: 2026-07-26T20:30:00.000+05:30
-image: /images/uploads/trapping-rain-water-03-two-pointer-settle.gif
+date: 2026-07-26
+image: "/images/uploads/trapping-rain-water-03-two-pointer-settle.gif"
 categories:
-  - code
+  - "code"
 authors:
   - Shubham Kumar
 tags:
-  - neetcode
-  - hard
-draft: true
+  - "neetcode"
+  - "hard"
+draft: false
 ---
+
 This is one of those problems where the formula is simple, but the trick is figuring out how much context each index needs.
 
 For any bar at index `i`, the water on top of it is:
